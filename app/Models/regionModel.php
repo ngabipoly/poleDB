@@ -16,6 +16,8 @@ class RegionModel extends Model
     protected $deletedField = 'deleted_at';
     protected $useSoftDeletes = true;
 
+    protected $returnType = 'object';
+
     protected $validationRules = [
         'name' => 'required|min_length[3]|max_length[255]',
         'code' => 'required|alpha_numeric|min_length[2]|max_length[10]'

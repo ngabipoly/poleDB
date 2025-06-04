@@ -1,71 +1,144 @@
-<?php namespace App\Controllers;
+<?php 
+namespace App\Controllers;
 
-use CodeIgniter\Controller;
 use App\Models\DistrictModel;
-use APP\Models\RegionModel;
+use App\Models\RegionModel;
+helper('App\Helpers\CustomHelpers');
 
-class DistrictManagement extends Controller
+class DistrictManagement extends BaseController
 {
+    protected $districtModel;
+    protected $regionModel;
+
+    public function __construct()
+    {
+        $this->districtModel = new DistrictModel();
+        $this->regionModel = new RegionModel();
+    }
 
     public function index()
     {
-        $model = new DistrictModel();
-        $regionModel = new RegionModel();
+        $model = $this->districtModel;
         $data['page'] = 'District Management';
-        $data['regions'] = 
-        $data['districts'] = $model->join('region r', 'region_id =r.id')->findAll();
+        $data['regions'] = $this->regionModel->findAll();
+        $data['districts'] = $model->join('region r', 'region_id =RegionId')->findAll();
         return view('forms/districtMgr', $data);
     }
 
+    function saveDetails(){
+        $district_id = $this->request->getPost('district_id');
+        if ($district_id) {
+            return $this->editDistrict($district_id);
+        } else {
+            return $this->addDistrict();
+        }
+    }
+
+    /**
+     * Add a new district
+     *
+     * @return \CodeIgniter\HTTP\Response
+     */
+
     public function addDistrict()
     {
-        $model = new DistrictModel();
-        if ($this->request->getMethod() == 'post') {
+        try {
+            $model = $this->districtModel;
             $data = [
-                'district_name' => $this->request->getPost('district_name'),
-                'district_code' => $this->request->getPost('district_code'),
-                'region_id' => $this->request->getPost('region_id')
-            ];
-            if ($model->insert($data)) {
-                return redirect()->to('/districts')->with('success', 'District added successfully');
-            }
+                        'name' => $this->request->getPost('district_name'),
+                        'code' => $this->request->getPost('district_code'),
+                        'region_id' => $this->request->getPost('region_id')
+                    ];
+            if (!$model->insert($data)) {
+                throw new \Exception('Failed to add district: ' . implode(', ', $model->errors()));   
+            } 
+            return jEncodeResponse(
+                $data, 
+                'District added successfully',
+                'success', 
+                200,  
+                true, 
+                base_url('public/districts')
+            );       
+        } catch (\Exception $e) {
+            // Log the error message
+            writeLog('Error adding district: ' . $e->getMessage());
+            return jEncodeResponse($data, $e->getMessage(),'error', 500,  false);
         }
-        $data['regions'] = (new \App\Models\RegionModel())->findAll();
-        return view('districts/add_district', $data);
+            
     }
 
-    public function editDistrict($district_id = null)
+public function editDistrict($district_id)
+{
+    try {
+        if (empty($district_id)) {
+            return jEncodeResponse([], 'Invalid district ID', 'error', 400, false);
+        }
+
+        $district = $this->districtModel->find($district_id);
+        if (!$district) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('District not found');
+        }
+
+        $district_name = $this->request->getPost('district_name');
+        $district_code = $this->request->getPost('district_code');
+        $district_region_id = $this->request->getPost('region_id');
+
+        $updateData = [
+            'name'      => $district_name,
+            'code'      => $district_code,
+            'region_id' => $district_region_id,
+        ];
+
+        if (!$this->districtModel->update($district_id, $updateData)) {
+            throw new \Exception("Failed to update district: $district_id - $district_name region-id:  $district_region_id " . implode(', ', $this->districtModel->errors()));
+        }
+
+        return jEncodeResponse(
+            $updateData,
+            'District updated successfully',
+            'success',
+            200,
+            true,
+            base_url('public/districts')
+        );
+    } catch (\Exception $e) {
+        writeLog('Error editing district: ' . $e->getMessage());
+        return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+    }
+}
+
+
+    public function deleteDistrict()
     {
-        $model = new DistrictModel();
-        if ($district_id) {
-            $district = $model->find($district_id);
+        try {
+            $district_id = $this->request->getPost('delete_district_id');
+            $district_name = $this->request->getPost('delete_district_name');
+
+            if (empty($district_id)) {
+            return jEncodeResponse([], 'Invalid district ID', 'error', 400, false);
+            }
+
+            $district = $this->districtModel->find($district_id);
             if (!$district) {
-                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('District not found');
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('District not found');
             }
-            $data['district'] = $district;
-            if ($this->request->getMethod() == 'post') {
-                $data = [
-                    'district_name' => $this->request->getPost('district_name'),
-                    'district_code' => $this->request->getPost('district_code')
-                ];
-                if ($model->update($district_id, $data)) {
-                    return redirect()->to("/districts")->with('success', 'District updated successfully');
-                }
-            }
-            $data['regions'] = (new \App\Models\RegionModel())->findAll();
-            return view('districts/edit_district', $data);
-        }
-        return redirect()->to('/districts');
-    }
 
-    public function deleteDistrict($district_id = null)
-    {
-        $model = new DistrictModel();
-        if ($district_id) {
-            if ($model->delete($district_id)) {
-                return redirect()->to('/districts')->with('success', 'District deleted successfully');
+            if (!$this->districtModel->delete($district_id)) {
+            throw new \Exception("Failed to delete district: $district_id - $district_name" . implode(', ', $this->districtModel->errors()));
             }
+
+            return jEncodeResponse(
+            [],
+            'District deleted successfully',
+            'success',
+            200,
+            true,
+            base_url('public/districts')
+            );
+        } catch (\Exception $e) {
+            writeLog("Error deleting district: $district_id - $district_name " . $e->getMessage());
+            return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
-        return redirect()->to('/districts');
     }
 }

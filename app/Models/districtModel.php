@@ -8,7 +8,7 @@ class DistrictModel extends Model
 {
     protected $table = 'tbldistrict';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['name', 'region_id', 'created_at', 'updated_at'];
+    protected $allowedFields = ['name','code', 'region_id', 'created_at', 'updated_at'];
     protected $useTimestamps = true;
 
     protected $createdField = 'created_at';
@@ -17,18 +17,24 @@ class DistrictModel extends Model
 
     protected $validationRules = [
         'name' => 'required|min_length[3]|max_length[255]',
-        'region_id' => 'required|integer'
+        'region_id' => 'required|integer',
+        'code' => 'required|min_length[2]|max_length[5]'
     ];
 
     protected $validationMessages = [
         'name' => [
-            'required' => 'The district name is required.',
+            'required' => 'No district name provided.',
             'min_length' => 'The district name must be at least 3 characters long.',
             'max_length' => 'The district name cannot exceed 255 characters.'
         ],
         'region_id' => [
-            'required' => 'Please select a region for the district.',
+            'required' => 'No region Selected for the district.',
             'integer' => 'Invalid region ID provided.'
+        ],
+        'code' => [
+            'required' => 'No district code provided.',
+            'min_length' => 'The district code must be at least 2 characters long.',
+            'max_length' => 'The district code cannot exceed 5 characters.'
         ]
     ];
 

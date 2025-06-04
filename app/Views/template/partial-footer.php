@@ -360,19 +360,48 @@ const checkRequired =(element,errorElm)=>{
   
 
   $(document).ready(function() {
-
-    $(document).on('click','.load-file-dtls',function(){
-      let url = $(this).data("url");
-      let file = $(this).data('fileid');
-      let elm = $('#file-details');
-      let user = $('#usr-logged-in').text();
-      let data = {'file-id':file}
-
-      $("#print-user").text(user);
-      elm.empty();
-      console.log(url);
-      loadElm(url,data,elm,'Loading File Details');
+    $('#add-district').click(function(e){
+      e.preventDefault();
+      $('#district-id').val('');
+      $('#district-region-code').val('');
+      $('#district-region-name').val('');
+      $('#district-code').val('');
+      $('#district-name').val('');
+      $('#region-id').val('');
+      $('#district-action').text('Add New District');
     });
+
+//get district editing details
+    $('.edit-district').click(function(){     
+      let district_id = $(this).data('district-id');
+      let region_code = $(this).data('district-region-code');
+      let region_name = $(this).data('district-region-name');
+      let code = $(this).data('district-code');
+      let name = $(this).data('district-name');
+      let region_id = $(this).data('region-id');
+     
+      $('#district-id').val(district_id);
+      $('#district-region-code').val(region_code);
+      $('#district-region-name').val(region_name);
+      $('#district-code').val(code);
+      $('#district-name').val(name);
+      $('#region-id').val(region_id);
+
+      $('#district-action').text(`Edit ${name} District`);
+    })
+
+    $('.delete-district').click(function(){
+      let district_id = $(this).data('district-id');
+      let district_name = $(this).data('district-name');
+      let region_name = $(this).data('region-name');
+      $('#spn-district-name').text(district_name);
+      $('#spn-region-name').text(region_name);
+      console.log('deleting district', district_id);
+      $('#delete-district-id').val(district_id);
+      $('#delete-district-name').val(district_name);
+    })
+
+
 
     $('#reset-pwd').click(function(e){
       console.log('resetting');
@@ -436,6 +465,7 @@ const checkRequired =(element,errorElm)=>{
       db_submit(target,$(this),msg);
     });
 
+
 function db_submit(resTarget,formSubmited,sendMsg){
   let alerts = '';
        $.ajax({
@@ -464,9 +494,9 @@ function db_submit(resTarget,formSubmited,sendMsg){
           	if(response.status=='success'){
           		toastr.success(response.msg);
               $(formSubmited).trigger("reset");    
-              if(typeof response.redir_to !='undefined'){
-                console.log(`Redirecting to ${response.redir_to}`);
-                location.replace(response.redir_to)
+              if(typeof response.redirect_url){
+                console.log(`Redirecting to ${response.redirect_url}`);
+                location.replace(response.redirect_url)
               }  	
           	}else if(response.status=='error'){
           		toastr.error(response.msg)

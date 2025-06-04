@@ -23,7 +23,7 @@
                             <div class="card-header">
                                 <h3 class="card-title">Manage Districts</h3>
                                 <div class="card-tools">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#district-modal">
+                                    <button type="button" class="btn btn-xs btn-radius-5 btn-primary" id="add-district" data-toggle="modal" data-target="#district-modal">
                                         <i class="fas fa-plus"></i> Add District
                                     </button>
                                 </div>
@@ -35,12 +35,40 @@
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
+                                                    <th>Region Code</th>
+                                                    <th>Region Name</th>
                                                     <th>District Code</th>
                                                     <th>District Name</th>
-                                                    <th>Region Name</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
+                                            <tbody>
+                                                <?php 
+                                                    foreach ($districts as $district) {
+                                                        echo "<tr>
+                                                                <td>{$district['id']}</td>
+                                                                <td>{$district['RegionCode']}</td>
+                                                                <td>{$district['RegionName']}</td>
+                                                                <td>{$district['code']}</td>
+                                                                <td>{$district['name']}</td>
+                                                                <td>
+                                                                    <button class='btn btn-info btn-xs edit-district' data-toggle='modal' data-target='#district-modal'  data-district-id='{$district['id']}' data-district-region-code='{$district['RegionCode']}' data-district-region-name='{$district['RegionName']}' data-district-code='{$district['code']}' data-district-name='{$district['name']}' data-region-id='{$district['region_id']}'><i class='fas fa-edit'></i></button>
+                                                                    <button class='btn btn-danger btn-xs delete-district' data-district-id='{$district['id']}' data-district-name='{$district['name']}' data-region-name='{$district['RegionName']}' data-toggle='modal' data-target='#delete-modal'> <i class='fas fa-trash'></i></button>
+                                                                </td>
+                                                              </tr>";
+                                                    }
+                                                ?>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Region Code</th>
+                                                    <th>Region Name</th>
+                                                    <th>District Code</th>
+                                                    <th>District Name</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div>
@@ -55,22 +83,21 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="district-mgr-h">New District</h4>
+                        <h4 class="modal-title" id="district-mgr-h"><span id="district-action">Add</span></h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form action="<?php echo base_url('districts/save');?>" id="frm-district-mgt" method="post" class="db-submit" data-initmsg="Saving District...">
+                    <form action="district/save" id="frm-district-mgt" method="post" class="db-submit" data-initmsg="Saving District...">
                     <?php echo csrf_field(); ?>
                     <div class="modal-body">
+                        <input type="hidden" name="district_id" id="district-id">
                         <div class="form-group">
                             <label for="region-id" class="col-form-label">Region:</label>
                             <select id="region-id" name="region_id" class="form-control" required>
                                 <?php 
-                                    $regionObj = new \App\Models\RegionModel();
-                                    $regions = $regionObj->findAll();
-                                    foreach ($regions as $r) {
-                                        echo "<option value='$r->id'>$r->region_name</option>";
+                                    foreach ($regions as $region) {
+                                        echo "<option value='$region->RegionId'>$region->RegionName</option>";
                                     }
                                 ?>
                             </select>
@@ -88,6 +115,30 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save District</button>
                     </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="delete-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Delete District</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="district/delete" method="post" class="db-submit" data-initmsg="Deleting District..." id="frm-delete-district">
+                        <?php echo csrf_field(); ?>
+                        <div class="modal-body">
+                            <p><i class="fas fa-exclamation-triangle text-danger"></i> Are you sure you want to delete <span id="spn-district-name"></span> district in  <span id="spn-region-name"></span> Region?</p>
+                            <input type="hidden" name="delete_district_id" id="delete-district-id">
+                            <input type="hidden" name="delete_district_name" id="delete-district-name">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </div>
                     </form>
                 </div>
             </div>

@@ -92,3 +92,17 @@ define('EVENT_PRIORITY_NORMAL', 100);
  * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_HIGH instead.
  */
 define('EVENT_PRIORITY_HIGH', 10);
+/**
+ * Define the application name
+ */
+define('APP_NAME', 'Pole Management');
+/**
+ * paths to use in the application
+ */
+define('SMS_API_URL', 'http://utlhq407:9191/api/sms/');
+define('SMS_API_AUTH', 'Basic VmFzQXBwOlZhc0RldkAxMjM0');
+define('SMS_API_USER', 'utlhq407');
+define('SMS_API_PASS', 'utlhq407');
+define('APPLOG', FCPATH.'applog'.DIRECTORY_SEPARATOR);
+define('LOG_FILE', APPLOG.'log_'.date('Ymd').'.log');
+define('EMAIL_API_URL', 'http://utlhq407:9192/api/email/');

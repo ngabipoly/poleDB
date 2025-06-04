@@ -149,4 +149,16 @@ helper('filesystem');
 
     }
 
+    //function to encode responses to JSON format
+    function jEncodeResponse($data,$msg, $status, $status_code = 200, $redirect=false, $redirect_url = null) {
+        return json_encode([
+            'status_code' => $status_code,
+            'status' => $status,
+            'msg' => $msg,
+            'data' => $data,
+            'redirect' => $redirect,
+            'redirect_url' => $redirect_url
+        ]);
+    }
+
     
