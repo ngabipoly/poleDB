@@ -6,14 +6,14 @@ use CodeIgniter\Model;
 class PoleModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'poles';
+    protected $table            = 'tblpole';
     protected $primaryKey       = 'pole_id';
     protected $useAutoIncrement = true;
     protected $insertID         = 0;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id','code','longitude','latitude','district_id', 'pole_type','pole_condition','created_at','updated_at','deleted_at', 'created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted'];
+    protected $allowedFields    = ['id','PoleCode','sizeId','longitude','latitude','district_id', 'pole_type','pole_condition','created_at','updated_at','deleted_at', 'created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted'];
 
 
     // Dates
@@ -25,19 +25,18 @@ class PoleModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'code' => 'required|alpha_numeric|min_length[3]|max_length[50]',
+        'PoleCode' => 'required|min_length[13]|max_length[13]',
         'longitude' => 'required|decimal',
         'latitude' => 'required|decimal',
         'district_id' => 'required|integer',
-        'pole_type' => 'required|in_list[wooden,metal,concrete]',
+        'sizeId' => 'required|integer',
         'pole_condition' => 'required|in_list[good,fair,poor]'
     ];
     protected $validationMessages   = [
-        'code' => [
+        'PoleCode' => [
             'required' => 'The pole code is required.',
-            'alpha_numeric' => 'The pole code may only contain letters and numbers.',
-            'min_length' => 'The pole code must be at least 3 characters long.',
-            'max_length' => 'The pole code cannot exceed 50 characters.'
+            'min_length' => 'The pole code must be at least 13 characters long.',
+            'max_length' => 'The pole code cannot exceed 13 characters.'
         ],
         'longitude' => [
             'required' => 'The longitude is required.',
@@ -51,9 +50,9 @@ class PoleModel extends Model
             'required' => 'Please select a district for the pole.',
             'integer' => 'Invalid Type for district ID provided.'
         ],
-        'pole_type' => [
-            'required' => 'The pole type is required.',
-            'in_list' => 'The pole type must be one of: wooden, metal, concrete.'
+        'sizeId' => [
+            'required' => 'Please select a pole Size.',
+            'integer' => 'Invalid Type for size ID provided.'
         ],
         'pole_condition' => [
             'required' => 'Please select a pole condition.',
@@ -84,4 +83,5 @@ class PoleModel extends Model
         $data['data']['updated_at'] = $currentDate;
         return $data;
     }
+
 }

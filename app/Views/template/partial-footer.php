@@ -160,6 +160,7 @@ $('#o-type').change(function(){
   }
 })
 
+
 //Add Number by Number function to miscellenious actions
 $("#misc-exec").click(function(e){
   e.preventDefault();
@@ -400,6 +401,24 @@ const checkRequired =(element,errorElm)=>{
       $('#delete-district-id').val(district_id);
       $('#delete-district-name').val(district_name);
     })
+
+  $("#district-id").change(function () {
+      const selectedOption = $(this).find("option:selected");
+
+      const region_code = selectedOption.data('region-code');
+      const region_name = selectedOption.data('region-name');
+      const region_id = selectedOption.data('region-id'); // Make sure this exists
+      const district_code = selectedOption.data('district-code');
+
+      const pole_code = `${region_code}-${district_code}`;
+
+      console.log("Arranging pole code information: " + pole_code);
+
+      $('#region_code').val(region_code);
+      $('#region_name').val(region_name);
+      $('#region_id').val(region_id);
+      $('#pole-code').val(pole_code);
+  });
 
 
 
