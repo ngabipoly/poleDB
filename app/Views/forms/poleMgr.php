@@ -24,69 +24,82 @@
                         <div class="card-header">
                             <h3 class="card-title">Manage Poles</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-xs btn-primary" id="add-pole" data-toggle="modal" data-target="#pole-modal">
+                                <button type="button" class="btn btn-xs btn-primary" id="add-pole" data-toggle="modal" data-target="#pole-modal" onclick="getLocation();">
                                     <i class="fas fa-plus"></i> Add Pole
                                 </button>
                             </div>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="poles-table" class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Latitude</th>
-                                            <th>Longitude</th>
-                                            <th>District</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($poles as $pole): ?>
-                                            <tr>
-                                                <td><?php echo $pole['PoleId'] ?></td>
-                                                <td><?php echo esc($pole['PoleCode']) ?></td>
-                                                <td><?php echo esc($pole['latitude']) ?></td>
-                                                <td><?php echo esc($pole['longitude']) ?></td>
-                                                <td><?php echo esc($pole['name']) ?></td>
-                                                <td>
-                                                    <button class="btn btn-info btn-xs edit-pole" 
-                                                            data-toggle="modal" 
-                                                            data-target="#pole-modal"
-                                                            data-pole-id="<?php echo $pole['PoleId'] ?>"
-                                                            data-pole-code="<?php echo esc($pole['PoleCode']) ?>"
-                                                            data-latitude="<?php echo esc($pole['latitude']) ?>"
-                                                            data-longitude="<?php echo esc($pole['longitude']) ?>"
-                                                            data-district-id="<?php echo $pole['district_id'] ?>">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn btn-danger btn-xs delete-pole" 
-                                                            data-toggle="modal" 
-                                                            data-target="#delete-modal"
-                                                            data-pole-id="<?php echo $pole['PoleId'] ?>"
-                                                            data-name="<?php echo esc($pole['PoleCode']) ?>">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                            <!-- add tabs for map view and table view -->
+                            <ul class="nav nav-tabs" id="poleTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="table-tab" data-toggle="tab" href="#table-view" role="tab" aria-controls="table-view" aria-selected="true"><strong>List View</strong></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="map-tab" data-toggle="tab" href="#map-view" role="tab" aria-controls="map-view" aria-selected="false"><strong>Map View</strong></a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="poleTabContent">
+                                <div class="tab-pane fade show active" id="table-view" role="tabpanel" aria-labelledby="table-tab">
+                                    <div class="row mb-3 mt-3">
+                                        <div class="col-md-12">
+                                            <button class="btn btn-primary btn-sm" id="refresh-table"><i class="fas fa-sync"></i> Refresh Table</button>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table id="poles-table" class="table table-bordered table-striped table-hover table-sm display compact nowrap" width="100%">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="text-sm"><strong>Pole Code</strong></th>
+                                                    <th class="text-sm"><strong>Pole Size</strong></th>
+                                                    <th class="text-sm"><strong>Region</strong></th>
+                                                    <th class="text-sm"><strong>District</strong></th>
+                                                    <th class="text-sm"><strong>Latitude</strong></th>
+                                                    <th class="text-sm"><strong>Longitude</strong></th>
+                                                    <th class="text-sm"><strong>Actions</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($poles as $pole): ?>
+                                                    <tr>
+                                                        <td><?php echo esc($pole['PoleCode']) ?></td>
+                                                        <td><?php echo esc($pole['SizeLabel']) ?></td>
+                                                        <td><?php echo esc($pole['RegionName']) ?></td>
+                                                        <td><?php echo esc($pole['name']) ?></td>
+                                                        <td><?php echo esc($pole['latitude']) ?></td>
+                                                        <td><?php echo esc($pole['longitude']) ?></td>
+                                                        <td>
+                                                            <button class="btn btn-info btn-xs edit-pole" 
+                                                                    data-toggle="modal" 
+                                                                    data-target="#pole-modal"
+                                                                    data-pole-id="<?php echo $pole['PoleId'] ?>"
+                                                                    data-pole-code="<?php echo esc($pole['PoleCode']) ?>"
+                                                                    data-latitude="<?php echo esc($pole['latitude']) ?>"
+                                                                    data-longitude="<?php echo esc($pole['longitude']) ?>"
+                                                                    data-district-id="<?php echo $pole['district_id'] ?>">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button class="btn btn-danger btn-xs delete-pole" 
+                                                                    data-toggle="modal" 
+                                                                    data-target="#delete-modal"
+                                                                    data-pole-id="<?php echo $pole['PoleId'] ?>"
+                                                                    data-name="<?php echo esc($pole['PoleCode']) ?>">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="map-view" role="tabpanel" aria-labelledby="map-tab">
+                                        <!-- MAP VIEW -->
+                                    <div id="pole-map" class="map mt-3" style="height: 400px; width: 100%;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- MAP VIEW -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Map View</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="pole-map" style="height: 400px; width: 100%;"></div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -160,7 +173,7 @@
                         <label for="pole-size">Pole Size</label>
                         <select name="pole_size" id="pole-size" class="form-control select2">
                             <option value="">--Select Size--</option>
-                            <?php foreach ($sizes as $size) { echo '<option value="' . $size['id'] . '">' . $size['size'] . '</option>'; } ?>
+                            <?php foreach ($sizes as $size) { echo '<option value="' . $size['id'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
                         </select>
                     </div>
                     <div class="form-group">
@@ -208,6 +221,7 @@
 
 <script>
     // Initialize Leaflet map
+    
     var map = L.map('pole-map').setView([0.3476, 32.5825], 7); // Uganda default center
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -217,7 +231,7 @@
     <?php foreach ($poles as $pole){ ?>
         L.marker([<?php echo $pole['latitude'] ?>, <?php echo $pole['longitude'] ?>])
             .addTo(map)
-            .bindPopup("<strong><?php echo esc($pole['PoleCode']) ?></strong><br><strong>District: </strong><?php echo esc($pole['name']) ?><br><strong>Size: </strong><?php echo esc($pole['size']) ?><br><strong>Condition: </strong><?php echo esc($pole['pole_condition']) ?>");
+            .bindPopup("<strong><?php echo esc($pole['PoleCode']) ?></strong><br><strong>District: </strong><?php echo esc($pole['name']) ?><br><strong>Size: </strong><?php echo esc($pole['SizeLabel']) ?><br><strong>Condition: </strong><?php echo esc($pole['pole_condition']) ?>");
     <?php } ?>
 
     // Auto-detect device location and fill inputs
@@ -227,10 +241,10 @@
                 document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
                 document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
             }, function(error) {
-                alert('Error fetching location: ' + error.message);
+                toastr.error('Error fetching location: ' + error.message);
             });
         } else {
-            alert('Geolocation is not supported by this browser.');
+            toastr.error('Geolocation is not supported by this browser.');
         }
     }
 </script>

@@ -95,7 +95,7 @@ define('EVENT_PRIORITY_HIGH', 10);
 /**
  * Define the application name
  */
-define('APP_NAME', 'Pole Management');
+define('APP_NAME', "Pole Management");
 /**
  * paths to use in the application
  */
@@ -106,3 +106,7 @@ define('SMS_API_PASS', 'utlhq407');
 define('APPLOG', FCPATH.'applog'.DIRECTORY_SEPARATOR);
 define('LOG_FILE', APPLOG.'log_'.date('Ymd').'.log');
 define('EMAIL_API_URL', 'http://utlhq407:9192/api/email/');
+define('MAX_LOGIN_ATTEMPTS', 5);
+define('LOGIN_ATTEMPT_TIMEOUT', 15 * MINUTE); // 15 minutes
+define('LOGIN_ATTEMPT_LOG', FCPATH.'login_attempts'.DIRECTORY_SEPARATOR);
+define('LOGIN_ATTEMPT_LOG_FILE', LOGIN_ATTEMPT_LOG.'log_'.date('Ymd').'.log');

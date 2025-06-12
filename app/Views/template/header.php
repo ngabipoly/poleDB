@@ -8,12 +8,12 @@
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="<?php echo base_url();?>public/assets/plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="<?php echo base_url();?>assets/plugins/fontawesome-free/css/all.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="<?php echo base_url();?>public/assets/css/adminlte.css">
-  <link rel="stylesheet" href="<?php echo base_url();?>public/assets/css/adminlte.min.css">
+  <link rel="stylesheet" href="<?php echo base_url();?>assets/css/adminlte.css">
+  <link rel="stylesheet" href="<?php echo base_url();?>assets/css/adminlte.min.css">
   <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="<?php echo base_url();?>public/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+  <link rel="stylesheet" href="<?php echo base_url();?>assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed" data-panel-auto-height-mode="height">
 
@@ -40,7 +40,7 @@
           </a>
           <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
             <span class="dropdown-item dropdown-header">
-              <a  href="<?php echo base_url('auth/log-out');?>" id="log-out" target="_top" title="Logout" >
+              <a  href="<?php echo base_url('pole-position/logout');?>" id="log-out" target="_top" title="Logout" >
                 <i class="fas fa-sign-out-alt"></i> Sign Out
             </a></span>
             <div class="dropdown-divider"></div>

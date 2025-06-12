@@ -2,40 +2,46 @@
 <!-- ./wrapper -->
 
 <!-- jQuery -->
-<script src="<?php echo base_url();?>public/assets/plugins/jquery/jquery.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/jquery/jquery.min.js"></script>
 <!-- jQuery UI 1.11.4 -->
-<script src="<?php echo base_url();?>public/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <script>
   $.widget.bridge('uibutton', $.ui.button)
 </script>
 <!-- Bootstrap 4 -->
-<script src="<?php echo base_url();?>public/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- overlayScrollbars -->
-<script src="<?php echo base_url();?>public/assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <!-- AdminLTE App -->
-<script src="<?php echo base_url();?>public/assets/js/adminlte.js"></script>
+<script src="<?php echo base_url();?>assets/js/adminlte.js"></script>
 <!-- Print Elements -->
-<script src="<?php echo base_url();?>public/assets/plugins/printThis/printThis.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/printThis/printThis.js"></script>
 <!-- AdminLTE for demo purposes -->
-<script src="<?php echo base_url();?>public/assets/plugins/moment/moment.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/daterangepicker/daterangepicker.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/moment/moment.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/daterangepicker/daterangepicker.js"></script>
 <!-- DataTables  & Plugins -->
-<script src="<?php echo base_url();?>public/assets/plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/jszip/jszip.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/pdfmake/pdfmake.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/pdfmake/vfs_fonts.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-buttons/js/buttons.print.min.js"></script>
-<script src="<?php echo base_url();?>public/assets/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/jszip/jszip.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/pdfmake/pdfmake.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/pdfmake/vfs_fonts.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 <!-- Toastr -->
-<script src="<?php echo base_url();?>public/assets/plugins/toastr/toastr.min.js"></script>
+<script src="<?php echo base_url();?>assets/plugins/toastr/toastr.min.js"></script>
 <script>
+      $('a[data-toggle="tab"][href="#map-view"]').on('shown.bs.tab', function () {
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 300); // Slight delay helps for layout to settle
+    });
+
     //Date range picker
     $('.daterange').daterangepicker({
         locale: {
@@ -48,165 +54,6 @@
       "responsive": true, "lengthChange": false, "autoWidth": false,
       "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-	
-    
-    //bind enter in manual loiading form
-    $('#num-add').keyup(function(e){
-      if(e.which===13){
-        e.preventDefault();
-        $('#btn-add-number').click();
-      }
-    });
-
-    //Add MSISDN to loader area
-    $('.btn-add-number').click(function(e){
-        e.preventDefault();
-        let sourceElm = $(this).data('source');
-        let targetElm = $(this).data('target');
-        let amountElm = $(this).data('amount');
-        let pFormElm = $(this).data('parent');
-
-        let feedBkElm = $('#load-status');
-        let msisdn = $(sourceElm).val();
-        let amount = $(amountElm).val();
-        let prevEntries = $(targetElm).val();
-        let newEntries = "";
-
-        console.log(msisdn.length, msisdn.substr)
-
-        if(!msisdn && !amount){
-          feedBkElm.hide().empty();
-          return false;
-        }
-        if(!msisdn){
-          toastr.error("Please enter MSISDN");
-          return false; 
-        }
-
-        if(!amount && amountElm){
-          toastr.error("Please Enter Amount");
-          return false; 
-        }else if(amount && amountElm){
-          newEntries=(!prevEntries)? `${msisdn},${amount}`:`\n${msisdn},${amount}`;
-        }else{
-          newEntries=(!prevEntries)? `${msisdn}`:`\n${msisdn}`;
-        }
-
-        if((msisdn.length ==9 && (msisdn.substring(0,2)=="71" || msisdn.substring(0,1)=="4"))||msisdn.substring(0,1)=="8"){
-          const fieldCheck = checkRequired($(pFormElm).find('.required'),feedBkElm);
-          if(fieldCheck===false){
-            return false;
-          }
-          console.log(`Adding ${msisdn}, ${amount}`);
-          $(targetElm).append(newEntries)
-          $(sourceElm).val('');
-          $(sourceElm).focus();
-        }else{
-          toastr.error("Invalid MSISDN");
-          return false;          
-        }
-    })
-
-
-    //post loadings
-    $(document).on('click', '#btn-post-loading',function(e){
-      e.preventDefault();
-      let message = 'Posting Loadings';
-      let feedBkElm = $('#load-status');
-      let loadings = $('#loader-area').val();
-      let uri = $(this).data('url');
-      let form = $(this).closest('form');
-
-      if(!loadings){
-        return toastr.error("No Data Submitted!")
-      }
-
-      let data = {
-        'loader-data':loadings,
-      };
-
-   try {
-        const dataSubmission = async()=>{
-			  const response = await submitData(uri,data,message,feedBkElm);
-			  let returns = JSON.parse(response);
-        console.log(`Returns, ${returns}`);
-			  if(returns.status){
-
-          form.find('textarea').text('');
-          form[0].reset();
-				  console.log(`File Added! Reference Number is ${returns.file_ref}, ${returns.ld_msg}`);
-          $(feedBkElm).removeClass('alert-danger alert-warning').addClass('alert-success').text(`File Added! Reference Number is ${returns.file_ref}, ${returns.ld_msg}`).show();
-			  }else{
-				  console.error(`Operation Failed! ${returns}`);
-				  feedBkElm.removeClass('alert-success alert-warning').addClass('alert-danger').text(`Error Creating Loadings File`).show() ;
-				  feedBkElm.css('display','block');
-			  }
-
-		  } 
-      dataSubmission();   
-    }catch (error) {
-      console.log(error)
-    }         
-
-    });
-//Control display of Bulk and Single entry options for miscellenious actions
-$('#o-type').change(function(){
-  if($(this).val()=="I"){
-    $('#bulk-ops').attr('hidden','hidden');
-    $('#single-entry-ops').show();
-  }else{
-    $('#single-entry-ops').hide();
-    $('#bulk-ops').removeAttr('hidden');
-  }
-})
-
-
-//Add Number by Number function to miscellenious actions
-$("#misc-exec").click(function(e){
-  e.preventDefault();
-    let actionType = $("#action-key").val();
-    let opType = $("#o-type").val();
-    let numbers = $("#o-queue").val();
-    let form = $(this).closest('form');
-    let url = $(this).data('url');
-    let feedBkElm = $('#messages');
-    let message = "Starting Operation.."
-
-    if(!numbers){
-      return toastr.error("Nothing in Queue! Please add MSISDNs.")
-    }
-
-    let formData = form.serialize();
-
-
-    console.log(formData)
-    try {
-        const dataSubmission = async()=>{
-			  const response = await submitData(url,formData,message,feedBkElm);
-			  let returns = JSON.parse(response);
-        console.log(`Returns, ${JSON.stringify(response)}`);
-			  if(returns.status){
-
-          form.find('textarea').text('');
-          form[0].reset();
-				  console.log(`File Added! Reference Number is ${returns.file_ref}, ${returns.ld_msg}`);
-          $(feedBkElm).removeClass('alert-danger alert-warning').addClass('alert-success').text(`File Added! Reference Number is ${returns.file_ref}, ${returns.ld_msg}`).show();
-			  }else{
-				  console.error(`Operation Failed! ${returns}`);
-				  feedBkElm.removeClass('alert-success alert-warning').addClass('alert-danger').text(`Error Creating Loadings File`).show() ;
-				  feedBkElm.css('display','block');
-          if(returns.message){
-            toastr.error(`${returns.message}`)
-          }
-			  }
-
-		  } 
-      dataSubmission();   
-    }catch (error) {
-      console.log(error)
-    }    
-
-});
 
 
 //load user information into modal
@@ -420,6 +267,38 @@ const checkRequired =(element,errorElm)=>{
       $('#pole-code').val(pole_code);
   });
 
+  // Pole Size Management
+  $(".add-pole-size").click(function(){
+    $('#poleSizeId').val('');
+    $('#poleType').val('');
+    $('#size-meteres').val('');
+    $('#poleSizeModalLabel').text('Add New Pole Size');
+  })
+
+  $(".edit-pole-size").click(function(){
+    let id = $(this).data('id');
+    let label = $(this).data('label');
+    let size = $(this).data('size');
+    $('#poleSizeId').val(id);
+    $('#poleType').val(label);
+    $('#size-meteres').val(size);    
+    $('#poleSizeModalLabel').text('Edit Pole Size');
+  })
+
+  $(".delete-pole-size").click(function(){
+    let id = $(this).data('id');
+    let label = $(this).data('label');
+    let size = $(this).data('size');
+
+    $('#delPoleSizeId').val(id);
+    $('#delPoleLabel').val(label);
+    $('#delSizeMeteres').val(size);
+
+    $('#deletePoleId').text(id);
+    $('#deletePoleSizeLabel').text(label);
+    $('#deletePoleSize').text(size);
+  })
+
 
 
     $('#reset-pwd').click(function(e){
@@ -456,27 +335,12 @@ const checkRequired =(element,errorElm)=>{
           } 
     });
 
-  //bulk file handling
-    $('#upload-form').submit(function(e) {
-        e.preventDefault();
-        let form = $(this);
-        let file_elm = $('#load-input');
-        let action_key =  $('#auto-ld');
-        bulkFileUpload(form,file_elm,action_key);
-    });
-
-    $('#frm-misc-actions').submit(function(e) {
-        e.preventDefault();
-        let form = $(this);
-        let file_elm = $('#action-file');
-        let action_key =  $('#action-key');
-        bulkFileUpload(form,file_elm,action_key)
-    });
     $('#log-out').click(function(e){
       e.preventDefault();
       url = $(this).attr('href');
       location.replace(url);
     })
+
     $('.db-submit').submit(function(e){
       e.preventDefault();
       let target = $('#target-elm')
@@ -514,8 +378,10 @@ function db_submit(resTarget,formSubmited,sendMsg){
           		toastr.success(response.msg);
               $(formSubmited).trigger("reset");    
               if(typeof response.redirect_url){
-                console.log(`Redirecting to ${response.redirect_url}`);
-                location.replace(response.redirect_url)
+                console.log(`Redirecting to ${response.redirect_url} in 3 seconds`);
+                setTimeout(function() {
+                  location.replace(response.redirect_url);
+                }, 3000);
               }  	
           	}else if(response.status=='error'){
           		toastr.error(response.msg)
@@ -534,11 +400,6 @@ function db_submit(resTarget,formSubmited,sendMsg){
   });
     
 }
-
-<?php
-  if($page==='Load Numbers'){ ?>
-
- <?php }?>
     //load file details
     status = {S:'Submitted', P:'Processed'};
     file_table = $('#data-table').DataTable({
@@ -596,6 +457,7 @@ function db_submit(resTarget,formSubmited,sendMsg){
       file_table.ajax.reload();
       }, 15000 );
 });
+
 
 function bulkFileUpload(form,file_elm,act_key){
   let url = form.attr('action');
