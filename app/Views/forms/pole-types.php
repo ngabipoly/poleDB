@@ -43,8 +43,8 @@
                                                     <td class="text-sm"><?php echo $size['SizeLabel']; ?></td>
                                                     <td class="text-sm"><?php echo $size['SizeMtrs']; ?></td>
                                                     <td class="text-sm">
-                                                        <button class="btn btn-sm btn-warning edit-pole-size" data-id="<?php echo $size['id']; ?>" data-label="<?php echo $size['SizeLabel']; ?>" data-size="<?php echo $size['SizeMtrs']; ?>" data-toggle="modal" data-target="#poleSizeModal"><i class="fas fa-edit"></i> Edit</button>
-                                                        <button class="btn btn-sm btn-danger delete-pole-size" data-id="<?php echo $size['id']; ?>" data-label="<?php echo $size['SizeLabel']; ?>" data-size="<?php echo $size['SizeMtrs']; ?>" data-toggle="modal" data-target="#deletePoleSizeModal"><i class="fas fa-trash"></i> Delete</button>
+                                                        <button class="btn btn-sm btn-warning edit-pole-size" data-id="<?php echo $size['poleSizeId']; ?>" data-label="<?php echo $size['SizeLabel']; ?>" data-size="<?php echo $size['SizeMtrs']; ?>" data-toggle="modal" data-target="#poleSizeModal"><i class="fas fa-edit"></i> Edit</button>
+                                                        <button class="btn btn-sm btn-danger delete-pole-size" data-id="<?php echo $size['poleSizeId']; ?>" data-label="<?php echo $size['SizeLabel']; ?>" data-size="<?php echo $size['SizeMtrs']; ?>" data-toggle="modal" data-target="#deletePoleSizeModal"><i class="fas fa-trash"></i> Delete</button>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

@@ -24,7 +24,7 @@ class PoleManagement extends Controller
     {
         $data = ['sizes' => $this->poleSizeModel->findAll()];
         $data['poles'] = $this->poleModel
-                                    ->join('tbl_polesize ps', 'ps.id = sizeId')
+                                    ->join('tbl_polesize ps', 'ps.poleSizeId = sizeId')
                                     ->join('tbldistrict d', 'd.id = district_id')
                                     ->join('region r', 'r.RegionId = d.region_id')
                                     ->findAll();
@@ -38,7 +38,9 @@ class PoleManagement extends Controller
     public function storePole()
     {
         $pole_id = $this->request->getPost('pole_id');
+        $pole_code = $this->request->getPost('pole_code');
         if($pole_id){
+            writeLog("Updating existing pole with ID: $pole_id and code: $pole_code");
             return $this->updatePole($pole_id);
         }
         return $this->addPole();
@@ -90,7 +92,7 @@ class PoleManagement extends Controller
     }
 
 
-    public function updatePole($pole_id)
+    public function updatePole($pole_id, $pole_code = null)
     {
         try {
             writeLog("Updating pole with ID: $pole_id");
@@ -102,18 +104,20 @@ class PoleManagement extends Controller
 
             if (!$pole) {
                 writeLog("Pole not found with ID: $pole_id");
-                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Pole not found');
+                throw new \Exception('Pole not found');
             }
 
-            $pole_code = $pole['code'];
+            $pole_code = $pole['PoleCode'];
             writeLog("Found pole: $pole_id - $pole_code");
 
             // Handle POST (form submission)
             $updateData = [
                 'name'        => $this->request->getPost('name'),
-                'latitude'    => $this->request->getPost('latitude'),
-                'longitude'   => $this->request->getPost('longitude'),
+                'latitude'    => $this->request->getPost('pole_latitude'),
+                'longitude'   => $this->request->getPost('pole_longitude'),
                 'district_id' => $this->request->getPost('district_id'),
+                'pole_condition' => $this->request->getPost('pole_condition'),
+                'sizeId'      => $this->request->getPost('pole_size')
             ];
 
             if (!$this->poleModel->update($pole_id, $updateData)) {
@@ -142,9 +146,9 @@ class PoleManagement extends Controller
     {
         try {
             writeLog("Initializing pole deletion process....");
-            $id = $this->request->getPost('id');
-            $pole_code = $this->request->getPost('code');
-            writeLog("Received pole ID: $id, code: $pole_code");
+            $id = $this->request->getPost('delete_pole_id');
+            $pole_code = $this->request->getPost('delete_pole_code');
+            writeLog("Received pole ID: $id, code: $pole_code for deletion");
             
             if (empty($id)) {
                 writeLog("No Pole ID provided for deletion");
@@ -155,10 +159,10 @@ class PoleManagement extends Controller
 
             if (!$pole) {
                 writeLog("Pole not found with ID: $id");
-                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Pole not found');
+                throw new \Exception('Pole not found');
             }
 
-            $pole_code = $pole['code'];
+            $pole_code = $pole['PoleCode'];
             writeLog("Found pole: $id - $pole_code");
 
             if (!$this->poleModel->delete($id)) {
@@ -173,8 +177,8 @@ class PoleManagement extends Controller
                 "Pole $id - $pole_code deleted successfully",
                 'success',
                 200,
-                true,
-                'public/pole-management'
+                true,                
+                'poles'
             );
         } catch (\Exception $e) {
             writeLog("Error deleting pole: $id " . $e->getMessage());
@@ -182,12 +186,18 @@ class PoleManagement extends Controller
         }
     }
 
-    public function getNextPoleNumber($district_id)
-    {
-        $totalPoles = $this->poleModel->where('district_id', $district_id)->countAllResults();
-        $nextNumber = $totalPoles + 1;
-        return str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-    }
+public function getNextPoleNumber($district_id)
+{
+    $totalPoles = $this->poleModel
+        ->withDeleted() // Include soft-deleted poles
+        ->where('district_id', $district_id)
+        ->countAllResults();
+
+    $nextNumber = $totalPoles + 1;
+
+    return str_pad($nextNumber, 6, '0', STR_PAD_LEFT); // e.g., 000012
+}
+
 
     public function poleTypes(){
         try {

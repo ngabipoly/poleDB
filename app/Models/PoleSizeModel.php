@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 class PoleSizeModel extends Model
 {
     protected $table = 'tbl_polesize';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'poleSizeId';
     protected $allowedFields = ['SizeLabel', 'SizeMtrs', 'create_time','date_modified','date_deleted'];
     protected $useTimestamps = true;
     protected $createdField = 'create_time';

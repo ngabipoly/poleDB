@@ -56,134 +56,134 @@
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
 
 
-//load user information into modal
-$('.user-edit').on('click',function(e){
-  $("#user-mgr-h").text("Edit User");
-  $('#uid').val($(this).data('uid'));
-  $('#pf-number').val($(this).data('pf'));
-  $('#first-name').val($(this).data('fname'));
-  $('#last-name').val($(this).data('lname'));;
-  $('#user-email').val($(this).data('uemail'));
-  $('#user-role').val($(this).data('urole'));;
-  $('#user-status').val($(this).data('ustatus'));
-  $('#reset-pwd').show();
-});
-
-$('#new-user').on('click',function(){
-    if($("#user-mgr-h").text()==="Edit User"){
-      $("#user-mgr-h").text("New User");
-      $("#frm-user-mgt").trigger("reset");
-      $('#reset-pwd').hide();
-    }  
-});
-
-//load role details for editing
-$('.get-role-rights').on('click', function(e) {
-    let url = $(this).data('url');
-    let entity_id = $(this).data('roleid');
-    let role_name = $(this).data('rolename');
-    let role_status = $(this).data('rolestatus');
-    let role_desc = $(this).data('desc');
-    let entity_type = 'R';
-
-    console.log(entity_id)
-
-    $('#role-name').val(role_name);
-    $('#role-id').val(entity_id);
-    $('#entity-id').val(entity_id);
-    $('#role-status').val(role_status);
-    $('#role-desc').text(role_desc);
-    $('#spn-role-name').text(role_name);
-    $('#role-action').text(`Modify Role ${role_name}`);
-
-    // Get Assigned Menu
-    let data = { entity_id: entity_id, entity_type: entity_type };
-    let elm = $('#roles')
-    loadElm(url,data,elm,'Fetching Role Menus...')
-});
-
-//Queue Menus for Addition
-$(document).on('click','#btn-assign',function(e){
-    e.preventDefault();
-    let assigned_menu_ids =''
-    console.log('assigning')
-    $('.chk-unassigned').each(function(){
-      if ($(this).prop('checked')) {
-        let menu_id = $(this).val() 
-        // Concatenate menu IDs with colon delimiter
-        assigned_menu_ids =(!assigned_menu_ids)? menu_id: `${assigned_menu_ids}:${menu_id}`;
-      }      
-    })
-    $('#assign-list').text(assigned_menu_ids);
-});
-
-//Queue Menus for revockation
-$(document).on('click','#btn-revoke',function(e){
-    e.preventDefault();
-    let revoked_menu_ids =''
-    console.log('assigning')
-    $('.chk-assigned').each(function(){
-      if ($(this).prop('checked')) {
-        let menu_id = $(this).val() 
-        // Concatenate menu IDs with colon delimiter
-        revoked_menu_ids =(!revoked_menu_ids)? menu_id: `${revoked_menu_ids}:${menu_id}`;
-      }      
-    })
-    $('#revoke-list').text(revoked_menu_ids);
-});
-
-//save to excel
-$(".save_excel").click(function(e) {   
-   let content = $(this).data('content');
-   window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('#content').html())); // content is the id of the DIV element  
-   e.preventDefault();   
-}); 
-
-const loadElm = (url,data,element,init_msg)=>{
-    $.ajax({
-        type: 'GET',
-        dataType: 'html',
-        url: url,
-        data: data,
-        beforeSend: function(){
-          toastr.info(init_msg);
-        },
-        success: function(response) {
-            // Update the content of the #roles element with the received HTML
-            element.html(response);
-        },
-        complete: function() {
-          toastr.info("Loading Complete!")
-        },
-        error: function(xhr) {
-            console.error(xhr);
-        }
+    //load user information into modal
+    $('.user-edit').on('click',function(e){
+        $("#user-mgr-h").text("Edit User");
+        $('#uid').val($(this).data('uid'));
+        $('#pf-number').val($(this).data('pf'));
+        $('#first-name').val($(this).data('fname'));
+        $('#last-name').val($(this).data('lname'));;
+        $('#user-email').val($(this).data('uemail'));
+        $('#user-role').val($(this).data('urole'));;
+        $('#user-status').val($(this).data('ustatus'));
+        $('#reset-pwd').show();
     });
-};
 
-//clear forms
-    $(document).ready(function() {
-        $('.reset').click(function() {
-          let form = $(this).closest('form');
-          form.find('textarea').text('');
-          form[0].reset();
-        });
+  $('#new-user').on('click',function(){
+      if($("#user-mgr-h").text()==="Edit User"){
+        $("#user-mgr-h").text("New User");
+        $("#frm-user-mgt").trigger("reset");
+        $('#reset-pwd').hide();
+      }  
   });
 
-//General function to check that all required fields are set
-const checkRequired =(element,errorElm)=>{
-  let messages = '<ul>';
-  let passed = true;
-  element.each(function(){
-      if($(this).val()==''){
-        passed=false
-         messages+=`<li> ${$(this).data('emptymsg')}</li>`;
-      }
-  })
-  messages+='</ul>'
-  errorElm.removeClass('alert-success alert-danger').addClass('alert-warning').html(messages);
-  return passed;
-}
+  //load role details for editing
+  $('.get-role-rights').on('click', function(e) {
+      let url = $(this).data('url');
+      let entity_id = $(this).data('roleid');
+      let role_name = $(this).data('rolename');
+      let role_status = $(this).data('rolestatus');
+      let role_desc = $(this).data('desc');
+      let entity_type = 'R';
+
+      console.log(entity_id)
+
+      $('#role-name').val(role_name);
+      $('#role-id').val(entity_id);
+      $('#entity-id').val(entity_id);
+      $('#role-status').val(role_status);
+      $('#role-desc').text(role_desc);
+      $('#spn-role-name').text(role_name);
+      $('#role-action').text(`Modify Role ${role_name}`);
+
+      // Get Assigned Menu
+      let data = { entity_id: entity_id, entity_type: entity_type };
+      let elm = $('#roles')
+      loadElm(url,data,elm,'Fetching Role Menus...')
+  });
+
+  //Queue Menus for Addition
+  $(document).on('click','#btn-assign',function(e){
+      e.preventDefault();
+      let assigned_menu_ids =''
+      console.log('assigning')
+      $('.chk-unassigned').each(function(){
+        if ($(this).prop('checked')) {
+          let menu_id = $(this).val() 
+          // Concatenate menu IDs with colon delimiter
+          assigned_menu_ids =(!assigned_menu_ids)? menu_id: `${assigned_menu_ids}:${menu_id}`;
+        }      
+      })
+      $('#assign-list').text(assigned_menu_ids);
+  });
+
+  //Queue Menus for revockation
+  $(document).on('click','#btn-revoke',function(e){
+      e.preventDefault();
+      let revoked_menu_ids =''
+      console.log('assigning')
+      $('.chk-assigned').each(function(){
+        if ($(this).prop('checked')) {
+          let menu_id = $(this).val() 
+          // Concatenate menu IDs with colon delimiter
+          revoked_menu_ids =(!revoked_menu_ids)? menu_id: `${revoked_menu_ids}:${menu_id}`;
+        }      
+      })
+      $('#revoke-list').text(revoked_menu_ids);
+  });
+
+  //save to excel
+  $(".save_excel").click(function(e) {   
+    let content = $(this).data('content');
+    window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('#content').html())); // content is the id of the DIV element  
+    e.preventDefault();   
+  }); 
+
+  const loadElm = (url,data,element,init_msg)=>{
+      $.ajax({
+          type: 'GET',
+          dataType: 'html',
+          url: url,
+          data: data,
+          beforeSend: function(){
+            toastr.info(init_msg);
+          },
+          success: function(response) {
+              // Update the content of the #roles element with the received HTML
+              element.html(response);
+          },
+          complete: function() {
+            toastr.info("Loading Complete!")
+          },
+          error: function(xhr) {
+              console.error(xhr);
+          }
+      });
+  };
+
+  //clear forms
+      $(document).ready(function() {
+          $('.reset').click(function() {
+            let form = $(this).closest('form');
+            form.find('textarea').text('');
+            form[0].reset();
+          });
+    });
+
+  //General function to check that all required fields are set
+  const checkRequired =(element,errorElm)=>{
+    let messages = '<ul>';
+    let passed = true;
+    element.each(function(){
+        if($(this).val()==''){
+          passed=false
+          messages+=`<li> ${$(this).data('emptymsg')}</li>`;
+        }
+    })
+    messages+='</ul>'
+    errorElm.removeClass('alert-success alert-danger').addClass('alert-warning').html(messages);
+    return passed;
+  }
 
 //Ajax Submission
   const submitData=(url,data,message,messageElm) =>{
@@ -297,6 +297,48 @@ const checkRequired =(element,errorElm)=>{
     $('#deletePoleId').text(id);
     $('#deletePoleSizeLabel').text(label);
     $('#deletePoleSize').text(size);
+  })
+
+  //Pole Management Controls
+  $('#add-pole').click(function(e){
+      e.preventDefault();
+      $('#pole-id').val('');
+      $('#pole-code').val('');
+      $('#pole-size').val('');
+      $('#district-id').val('');
+      $('#latitude').val('');
+      $('#longitude').val('');
+      $('#pole-condition').val('');
+      $('#pole-action-title').text('Add New Pole');
+  })
+  $('.edit-pole').click(function(){
+      let pole_id = $(this).data('pole-id');
+      let pole_code = $(this).data('pole-code');
+      let pole_size = $(this).data('pole-size');
+      let district_id = $(this).data('district-id');
+      let pole_lat  = $(this).data('latitude');
+      let pole_lng  = $(this).data('longitude');
+      let pole_condition = $(this).data('pole-condition');
+
+      $('#pole-id').val(pole_id);
+      $('#pole-code').val(pole_code);
+      $('#pole-size').val(pole_size);
+      $('#pole-condition').val((pole_condition || '').toLowerCase());
+      $('#district-id').val(district_id);
+      $('#latitude').val(pole_lat);
+      $('#longitude').val(pole_lng);
+
+      $('#pole-action-title').text(`Edit ${pole_code} Pole`);
+  })
+
+  $('.delete-pole').click(function(){
+      let pole_id = $(this).data('pole-id');
+      let pole_code = $(this).data('name');
+      $('#delete-pole-id').val(pole_id);
+      $('#delete-pole-code').val(pole_code);
+
+      $('#delete-pole-name').text(pole_code);
+      $('#delete-pole-id').text(pole_id);
   })
 
 

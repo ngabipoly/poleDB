@@ -21,10 +21,10 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header bg-primary">
                             <h3 class="card-title">Manage Poles</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-xs btn-primary" id="add-pole" data-toggle="modal" data-target="#pole-modal" onclick="getLocation();">
+                                <button type="button" class="btn btn-xs bg-gray-dark" id="add-pole" data-toggle="modal" data-target="#pole-modal" onclick="getLocation();">
                                     <i class="fas fa-plus"></i> Add Pole
                                 </button>
                             </div>
@@ -76,7 +76,9 @@
                                                                     data-pole-code="<?php echo esc($pole['PoleCode']) ?>"
                                                                     data-latitude="<?php echo esc($pole['latitude']) ?>"
                                                                     data-longitude="<?php echo esc($pole['longitude']) ?>"
-                                                                    data-district-id="<?php echo $pole['district_id'] ?>">
+                                                                    data-district-id="<?php echo $pole['district_id'] ?>" 
+                                                                    data-pole-size="<?php echo $pole['poleSizeId'] ?>"
+                                                                    data-pole-condition="<?php echo esc($pole['pole_condition']) ?>">
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
                                                             <button class="btn btn-danger btn-xs delete-pole" 
@@ -110,10 +112,10 @@
 <div class="modal fade" id="pole-modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="pole-management/store" method="post" class="db-submit" id="pole-form" data-innit-msg="Adding new pole">
+            <form action="pole-management/store" method="post" class="db-submit" id="pole-form" data-initmsg="Adding new pole">
                 <?php echo csrf_field(); ?>
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Pole <i class="fas fa-tower"></i></h5>
+                    <h5 class="modal-title"><span id="pole-action-title"> Add Pole </span><i class="fas fa-tower"></i></h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
@@ -158,13 +160,13 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label for="longitude">Longitude</label>
-                                <input type="text" class="form-control" id="longitude" name="pole_longitude" required>                        
+                                <input type="text" class="form-control" id="longitude" name="pole_longitude" required readonly>                        
                             </div>                            
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label for="latitude">Latitude</label>
-                                <input type="text" class="form-control" id="latitude" name="pole_latitude" required>
+                                <input type="text" class="form-control" id="latitude" name="pole_latitude" required readonly>
                             </div>                            
                         </div>
                     </div>
@@ -173,7 +175,7 @@
                         <label for="pole-size">Pole Size</label>
                         <select name="pole_size" id="pole-size" class="form-control select2">
                             <option value="">--Select Size--</option>
-                            <?php foreach ($sizes as $size) { echo '<option value="' . $size['id'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
+                            <?php foreach ($sizes as $size) { echo '<option value="' . $size['poleSizeId'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
                         </select>
                     </div>
                     <div class="form-group">
@@ -200,15 +202,16 @@
 <div class="modal fade" id="delete-modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="<?= base_url('pole-management/delete') ?>" method="post" class="db-submit">
+            <form action="<?= base_url('pole-management/delete') ?>" method="post" class="db-submit" id="delete-form" data-initmsg="Deleting pole">
                 <?php echo csrf_field(); ?>
-                <div class="modal-header">
-                    <h5 class="modal-title">Delete Pole</h5>
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Delete Pole</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <p><i class="fas fa-exclamation-triangle text-danger"></i> Are you sure you want to delete <strong id="delete-pole-name"></strong>?</p>
+                    <p>Are you sure you want to delete Pole <strong id="delete-pole-name"></strong>?</p>
                     <input type="hidden" name="delete_pole_id" id="delete-pole-id">
+                    <input type="hidden" name="delete_pole_code" id="delete-pole-code">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

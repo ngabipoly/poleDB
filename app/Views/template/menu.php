@@ -68,7 +68,7 @@
                   if($link['type']=='url'){
                   ?>
                   <li class="nav-item">
-                    <a href="<?php echo $link['url'];?>" class="nav-link">
+                    <a href="<?php echo $link['url'];?>" class="nav-link" data-widget="iframe" data-title="<?php echo $link['menu_name'];?>">
                       <i class="<?php echo $link['icon'];?>"></i>
                       <p>
                         <?php echo $link['menu_name'];?>

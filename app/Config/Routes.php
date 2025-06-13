@@ -25,6 +25,8 @@ $routes->post('pole-management/delete', 'PoleManagement::deletePole/');
 $routes->get('pole-management/pole-types', 'PoleManagement::poleTypes');
 $routes->post('pole-management/save-pole-type', 'PoleManagement::savePoleType');
 $routes->post('pole-management/delete-pole-type', 'PoleManagement::deletePoleType');
+$routes->get('reverse-geocode', 'Location::reverseGeocode');
+
 
 //User Management Routes
 $routes->get('administration/usr-admin', 'UserRoleMgr::index');

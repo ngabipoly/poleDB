@@ -7,11 +7,11 @@ class PoleModel extends Model
 {
     protected $DBGroup          = 'default';
     protected $table            = 'tblpole';
-    protected $primaryKey       = 'pole_id';
+    protected $primaryKey       = 'PoleId';
     protected $useAutoIncrement = true;
     protected $insertID         = 0;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = ['id','PoleCode','sizeId','longitude','latitude','district_id', 'pole_type','pole_condition','created_at','updated_at','deleted_at', 'created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted'];
 
