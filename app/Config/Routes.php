@@ -11,6 +11,11 @@ $routes->get('pole-position/logout', 'AppAuth::logout');
 
 // Dashboard Routes
 $routes->get('home', 'Home::index');
+$routes->get('dashboard', 'Home::dashboard');
+$routes->get('dashboard/polesPerRegion', 'Home::polesPerRegion');
+$routes->get('dashboard/polesPerSize', 'Home::polesPerSize');
+$routes->get('dashboard/polesByStatus', 'Home::polesByStatus');
+$routes->get('dashboard/summaryStats', 'Home::summaryStats');
 
 $routes->get('districts', 'DistrictManagement::index');
 $routes->post('district/save', 'DistrictManagement::saveDetails');
@@ -26,6 +31,7 @@ $routes->get('pole-management/pole-types', 'PoleManagement::poleTypes');
 $routes->post('pole-management/save-pole-type', 'PoleManagement::savePoleType');
 $routes->post('pole-management/delete-pole-type', 'PoleManagement::deletePoleType');
 $routes->get('reverse-geocode', 'Location::reverseGeocode');
+$routes->get('pole/getPoleMapData', 'PoleManagement::mapData');
 
 
 //User Management Routes

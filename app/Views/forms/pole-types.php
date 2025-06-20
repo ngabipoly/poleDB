@@ -28,7 +28,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover table-sm " width="100%">
+                                <table class="table table-bordered table-striped table-hover  table-sm " width="100%">
                                     <thead class="thead-dark">
                                         <tr>
                                             <th class="text-sm">Size Label</th>

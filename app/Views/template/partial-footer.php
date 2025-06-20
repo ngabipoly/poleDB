@@ -35,12 +35,32 @@
 <script src="<?php echo base_url();?>assets/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 <!-- Toastr -->
 <script src="<?php echo base_url();?>assets/plugins/toastr/toastr.min.js"></script>
+<!-- ChartJS -->
+<script src="<?php echo base_url();?>assets/plugins/chart.js/Chart.min.js"></script>
+
+
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 <script>
-      $('a[data-toggle="tab"][href="#map-view"]').on('shown.bs.tab', function () {
-        setTimeout(function () {
-            map.invalidateSize();
-        }, 300); // Slight delay helps for layout to settle
-    });
+
+      // Auto-detect device location and fill inputs
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              $('#latitude').val(position.coords.latitude.toFixed(6));
+              $('#longitude').val(position.coords.longitude.toFixed(6));
+            }, function(error) {
+                toastr.error('Error fetching location: ' + error.message);
+            }, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+          });
+        } else {
+            toastr.error('Geolocation is not supported by this browser.');
+        }
+    }
+
+  $(document).ready(function () {
 
     //Date range picker
     $('.daterange').daterangepicker({
@@ -54,6 +74,108 @@
       "responsive": true, "lengthChange": false, "autoWidth": false,
       "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+
+  <?php
+    if($page === 'Dashboard'){ ?>
+            // Load summary stats
+        $.getJSON("<?php echo base_url('/dashboard/summaryStats'); ?>", function (data) {
+            console.log(data);
+            $('#totalPoles').text(data.totalPoles);
+            $('#totalDistricts').text(data.totalDistricts);
+            $('#damagedPoles').text(data.damagedPoles);
+            $('#goodPoles').text(data.goodPoles);
+            $('#replanted').text(data.replantedPoles);
+            $('#monthlyAddition').text(data.monthlyAddition);
+
+            // Region Chart
+            const regionLabels = data.PolesPerRegion.map(item => item.RegionName);
+            const regionData = data.PolesPerRegion.map(item => parseInt(item.poles_count));
+            new Chart($('#regionChart'), {
+        type: 'bar',
+        data: {
+            labels: data.PolesByConditionPerRegion.regionNames,
+            datasets: data.PolesByConditionPerRegion.stackedData
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Pole Status by Region'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Poles'
+                    }
+                }
+            }
+        }
+    });
+
+            //chart - Poles by Condition
+            let labels = data.PolesByCondition.map(e => e.pole_condition);
+            let counts = data.PolesByCondition.map(e => e.count);
+            // Condition Chart
+              new Chart($('#conditionChart'), {
+                  type: 'doughnut',
+                  data: {
+                  labels: labels,
+                  datasets: [{
+                      data: counts,
+                      backgroundColor: ['#28a745', '#ffc107', '#6c757d']
+                  }]
+                  }
+              });
+
+              const sizeLabels = data.polesPerSize.map(item => item.SizeLabel);
+              const sizeCounts = data.polesPerSize.map(item => parseInt(item.count));
+   
+            new Chart($('#sizeChart'), {
+                type: 'doughnut',
+                data: {
+                labels: sizeLabels,
+                datasets: [{
+                    label: 'Poles by Size',
+                    data: sizeCounts,
+                    backgroundColor: ['#007bff', '#dc3545', '#6c757d', '#28a745']
+                }]
+                },
+                options: { 
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        font: {
+                          size: 14
+                        }
+                      }
+                    },
+                    title: {
+                      display: true,
+                      text: 'Poles by Size'
+                    }
+                  }
+                }
+            });
+        });
+
+      <?php } ?>
 
 
     //load user information into modal
@@ -300,6 +422,125 @@
   })
 
   //Pole Management Controls
+let map; // Declare globally to reuse
+let mapInitialized = false;
+
+$('#map-tab').click(function (e) {
+    e.preventDefault();
+
+    // Toggle tabs
+    $('#map-view').addClass('active');
+    $('#pole-list').removeClass('active');
+    $('#map-view-tab').addClass('active show');
+    $('#pole-list-tab').removeClass('active show');
+    $('#pole-map').show();
+
+    console.log('Map tab clicked');
+
+    if (!mapInitialized) {
+        initMap();
+        mapInitialized = true;
+        console.log('Map initialized');
+    } else {
+        setTimeout(() => {
+            map.invalidateSize(); // Refresh map display
+            console.log('Map refreshed');
+        }, 300);
+    }
+});
+
+function initMap() {
+    // Define custom icon styles using colored PNGs
+    const iconBaseUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+    const icons = {
+        Good: new L.Icon({
+            iconUrl: iconBaseUrl + 'marker-icon-green.png',
+            shadowUrl: iconBaseUrl + 'marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        }),
+        Damaged: new L.Icon({
+            iconUrl: iconBaseUrl + 'marker-icon-yellow.png', // Yellow closest to orange
+            shadowUrl: iconBaseUrl + 'marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        }),
+        Stolen: new L.Icon({
+            iconUrl: iconBaseUrl + 'marker-icon-red.png',
+            shadowUrl: iconBaseUrl + 'marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        }),
+        Replanted: new L.Icon({
+            iconUrl: iconBaseUrl + 'marker-icon-blue.png',
+            shadowUrl: iconBaseUrl + 'marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        }),
+        Default: new L.Icon.Default()
+    };
+
+    // Create map
+    const map = L.map('pole-map').setView([0.3476, 32.5825], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Use marker cluster group
+    const markerCluster = L.markerClusterGroup();
+
+    // Load pole data
+    $.getJSON("<?php echo base_url('pole/getPoleMapData') ?>", function (poles) {
+        poles.forEach(pole => {
+            const icon = icons[pole.pole_condition] || icons.Default;
+            const condition = pole.pole_condition || 'Default';
+                const popupContent = `
+                  <div class="popup-${condition.toLowerCase()} leaflet-popup-custom">
+                      <strong>${pole.PoleCode}</strong><br>
+                      <strong>District:</strong> ${pole.districtName}<br>
+                      <strong>Size:</strong> ${pole.SizeLabel}<br>
+                      <strong>Status:</strong> ${condition}
+                  </div>
+             `;
+            const marker = L.marker([parseFloat(pole.latitude), parseFloat(pole.longitude)], {
+                icon: icon
+            }).bindPopup(popupContent).on('popupopen', function (e) {
+                const popup = e.popup;
+                const colorClass = `popup-${condition.toLowerCase()}`;
+
+                // Add color class to content wrapper and tip
+                const popupEl = popup.getElement();
+                if (popupEl) {
+                    popupEl.querySelector('.leaflet-popup-content-wrapper')?.classList.add(colorClass);
+                    popupEl.querySelector('.leaflet-popup-tip')?.classList.add(colorClass);
+                }
+            });
+;
+
+            markerCluster.addLayer(marker);
+        });
+
+        map.addLayer(markerCluster);
+    });
+
+    // Fix layout when tab is shown
+    $('a[data-toggle="tab"][href="#map-view"]').on('shown.bs.tab', function () {
+        setTimeout(() => map.invalidateSize(), 300);
+    });
+}
+
+
+
+
   $('#add-pole').click(function(e){
       e.preventDefault();
       $('#pole-id').val('');
@@ -310,6 +551,7 @@
       $('#longitude').val('');
       $('#pole-condition').val('');
       $('#pole-action-title').text('Add New Pole');
+      $('#pole-condition option[value="stolen"]').remove();
   })
   $('.edit-pole').click(function(){
       let pole_id = $(this).data('pole-id');
@@ -320,6 +562,7 @@
       let pole_lng  = $(this).data('longitude');
       let pole_condition = $(this).data('pole-condition');
 
+      $('#pole-condition').append('<option value="stolen">Stolen</option>');
       $('#pole-id').val(pole_id);
       $('#pole-code').val(pole_code);
       $('#pole-size').val(pole_size);
@@ -545,6 +788,7 @@ $('#print-report').click(function(){
 function print_elm(elem){
   $(elem).printThis();
 }
+  });
 </script>
 </body>
 </html>

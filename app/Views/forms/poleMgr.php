@@ -1,4 +1,59 @@
 <?php echo view('template/partial-header'); ?>
+<style type="text/css">
+        .marker-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+        }
+        .marker-icon.good {
+            background-color: green;
+        }
+        .marker-icon.reused {
+            background-color: blue;
+        }
+        .marker-icon.damaged {
+            background-color: orange;
+        }
+        .marker-icon.stolen {
+            background-color: red;
+        }
+        .leaflet-popup-content-wrapper {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        padding: 8px;
+    }
+
+    .leaflet-popup-custom {
+        padding: 5px;
+        border-radius: 5px;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .popup-good {
+        background-color: #28a745; /* Bootstrap green */
+    }
+
+    .popup-damaged {
+        background-color: #ffc107; /* Bootstrap yellow */
+        color: #212529; /* dark text for readability */
+    }
+
+    .popup-stolen {
+        background-color: #dc3545; /* Bootstrap red */
+    }
+
+    .popup-replanted {
+        background-color: #007bff; /* Bootstrap blue */
+    }
+
+    .popup-default {
+        background-color: #6c757d; /* Bootstrap gray */
+    }
+
+</style>   
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -22,7 +77,7 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header bg-primary">
-                            <h3 class="card-title">Manage Poles</h3>
+                            <h3 class="card-title"><i class="fas fa-broadcast-tower"></i> Manage Poles</h3>
                             <div class="card-tools">
                                 <button type="button" class="btn btn-xs bg-gray-dark" id="add-pole" data-toggle="modal" data-target="#pole-modal" onclick="getLocation();">
                                     <i class="fas fa-plus"></i> Add Pole
@@ -41,13 +96,18 @@
                             </ul>
                             <div class="tab-content" id="poleTabContent">
                                 <div class="tab-pane fade show active" id="table-view" role="tabpanel" aria-labelledby="table-tab">
-                                    <div class="row mb-3 mt-3">
-                                        <div class="col-md-12">
-                                            <button class="btn btn-primary btn-sm" id="refresh-table"><i class="fas fa-sync"></i> Refresh Table</button>
+                                    <div class="row mb-2 border-bottom pt-2 pr-2 pb-2">
+                                        <div class="col-md-12 text-right">
+                                            <!-- toggle tabluar view -->                                            
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="toggle-view" checked>
+                                                <label class="custom-control-label" for="toggle-view">Tablular View</label>
+                                            </div>                                            
                                         </div>
                                     </div>
+                                    
                                     <div class="table-responsive">
-                                        <table id="poles-table" class="table table-bordered table-striped table-hover table-sm display compact nowrap" width="100%">
+                                        <table id="poles-table" class="table table-bordered table-striped table-hover table-sm display data-table nowrap" width="100%">
                                             <thead class="thead-dark">
                                                 <tr>
                                                     <th class="text-sm"><strong>Pole Code</strong></th>
@@ -56,19 +116,25 @@
                                                     <th class="text-sm"><strong>District</strong></th>
                                                     <th class="text-sm"><strong>Latitude</strong></th>
                                                     <th class="text-sm"><strong>Longitude</strong></th>
+                                                    <th class="text-sm"><strong>Pole Condition</strong></th>
+                                                    <th class="text-sm"><strong>Added By</strong></th>
+                                                    <th class="text-sm"><strong>Date Added</strong></th>
                                                     <th class="text-sm"><strong>Actions</strong></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($poles as $pole): ?>
                                                     <tr>
-                                                        <td><?php echo esc($pole['PoleCode']) ?></td>
-                                                        <td><?php echo esc($pole['SizeLabel']) ?></td>
-                                                        <td><?php echo esc($pole['RegionName']) ?></td>
-                                                        <td><?php echo esc($pole['name']) ?></td>
-                                                        <td><?php echo esc($pole['latitude']) ?></td>
-                                                        <td><?php echo esc($pole['longitude']) ?></td>
-                                                        <td>
+                                                        <td class="text-sm"><?php echo esc($pole['PoleCode']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['SizeLabel']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['RegionName']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['districtName']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['latitude']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['longitude']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['pole_condition']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['lastname'].', '.$pole['firstname']) ?></td>
+                                                        <td class="text-sm"><?php echo esc($pole['pole_created_at']) ?></td>
+                                                        <td class="text-sm">
                                                             <button class="btn btn-info btn-xs edit-pole" 
                                                                     data-toggle="modal" 
                                                                     data-target="#pole-modal"
@@ -76,7 +142,7 @@
                                                                     data-pole-code="<?php echo esc($pole['PoleCode']) ?>"
                                                                     data-latitude="<?php echo esc($pole['latitude']) ?>"
                                                                     data-longitude="<?php echo esc($pole['longitude']) ?>"
-                                                                    data-district-id="<?php echo $pole['district_id'] ?>" 
+                                                                    data-district-id="<?php echo $pole['districtId'] ?>" 
                                                                     data-pole-size="<?php echo $pole['poleSizeId'] ?>"
                                                                     data-pole-condition="<?php echo esc($pole['pole_condition']) ?>">
                                                                 <i class="fas fa-edit"></i>
@@ -140,11 +206,11 @@
                             foreach ($grouped as $regionName => $districtList) {
                                 echo '<optgroup label="' . htmlspecialchars($regionName) . '">';
                                 foreach ($districtList as $district) {
-                                    echo '<option value="' . htmlspecialchars($district['id']) . '" ' .
+                                    echo '<option value="' . htmlspecialchars($district['districtId']) . '" ' .
                                         'data-region-code="' . htmlspecialchars($district['RegionCode']) . '" ' .
                                         'data-region-name="' . htmlspecialchars($district['RegionName']) . '" ' .
                                         'data-district-code="' . htmlspecialchars($district['code']) . '">' .
-                                        htmlspecialchars($district['name']) .
+                                        htmlspecialchars($district['districtName']) .
                                         '</option>';
                                 }
                                 echo '</optgroup>';
@@ -183,8 +249,8 @@
                         <select name="pole_condition" id="pole-condition" class="form-control select2">
                             <option value="">--Select Condition--</option>
                             <option value="good">Good</option>
-                            <option value="fair">Fair</option>
-                            <option value="poor">Poor</option>
+                            <option value="re-used">Re-Used</option>
+                            <option value="damaged">Damaged</option>
                         </select>
                     </div>
                 </div>
@@ -221,35 +287,5 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Initialize Leaflet map
-    
-    var map = L.map('pole-map').setView([0.3476, 32.5825], 7); // Uganda default center
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    <?php foreach ($poles as $pole){ ?>
-        L.marker([<?php echo $pole['latitude'] ?>, <?php echo $pole['longitude'] ?>])
-            .addTo(map)
-            .bindPopup("<strong><?php echo esc($pole['PoleCode']) ?></strong><br><strong>District: </strong><?php echo esc($pole['name']) ?><br><strong>Size: </strong><?php echo esc($pole['SizeLabel']) ?><br><strong>Condition: </strong><?php echo esc($pole['pole_condition']) ?>");
-    <?php } ?>
-
-    // Auto-detect device location and fill inputs
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
-                document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
-            }, function(error) {
-                toastr.error('Error fetching location: ' + error.message);
-            });
-        } else {
-            toastr.error('Geolocation is not supported by this browser.');
-        }
-    }
-</script>
 
 <?php echo view('template/partial-footer'); ?>

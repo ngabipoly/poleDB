@@ -99,11 +99,11 @@ class AppAuth extends BaseController
 
             // Fetch menu items
             $menus = !empty($menuIds)
-                ? $this->menuModel->where(['type' => 'url'])->orderBy('menu_category')->find($menuIds)
+                ? $this->menuModel->where(['type' => 'url'])->orderBy('order')->find($menuIds)
                 : [];
 
             $lists = !empty($menuIds)
-                ? $this->menuModel->where(['type' => 'list'])->orderBy('menu_category')->find($menuIds) // $this->menuModel->where(['type' => 'list'])->orderBy('menu_category')->find($menuIds)
+                ? $this->menuModel->where(['type' => 'list'])->orderBy('order')->find($menuIds) // $this->menuModel->where(['type' => 'list'])->orderBy('menu_category')->find($menuIds)
                 : [];
 
             $redircet_url = base_url('home');

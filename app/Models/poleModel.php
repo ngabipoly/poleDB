@@ -13,7 +13,7 @@ class PoleModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id','PoleCode','sizeId','longitude','latitude','district_id', 'pole_type','pole_condition','created_at','updated_at','deleted_at', 'created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted'];
+    protected $allowedFields    = ['id','PoleCode','sizeId','longitude','latitude','district_id', 'pole_type','pole_condition','created_at','updated_at','deleted_at', 'created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted','deleted_by', 'created_by', 'updated_by'];
 
 
     // Dates
@@ -30,7 +30,7 @@ class PoleModel extends Model
         'latitude' => 'required|decimal',
         'district_id' => 'required|integer',
         'sizeId' => 'required|integer',
-        'pole_condition' => 'required|in_list[good,fair,poor]'
+        'pole_condition' => 'required|in_list[good,damaged,re-used,stolen]'
     ];
     protected $validationMessages   = [
         'PoleCode' => [
@@ -56,7 +56,7 @@ class PoleModel extends Model
         ],
         'pole_condition' => [
             'required' => 'Please select a pole condition.',
-            'in_list' => 'The pole condition must be one of: good, fair, poor.'
+            'in_list' => 'The pole condition must be one of: good, damaged, re-used.'
         ]
     ];
     protected $skipValidation       = false;
@@ -83,5 +83,62 @@ class PoleModel extends Model
         $data['data']['updated_at'] = $currentDate;
         return $data;
     }
+    public function getPolesGroupedBy($column)
+    {
+        return $this->select("$column, COUNT(*) as count")
+                    ->join('tbl_polesize ps', 'tblpole.sizeId = ps.poleSizeId')
+                    ->join('tbldistrict', 'tblpole.district_id = tbldistrict.districtId')
+                    ->join('region', 'tbldistrict.region_id = region.RegionId')
+                    ->groupBy($column)
+                    ->orderBy('count', 'DESC')
+                    ->findAll();
+    }
+    public function countDistinct($column)
+    {
+        return $this->distinct()->select($column)->countAllResults();
+    }
 
+    public function getPole(int $poleId = 0, array $conditions = [], array $conditionsNot = [])
+    {
+        $builder = $this->select([
+                'tblpole.PoleId',
+                'tblpole.PoleCode',
+                'tblpole.latitude',
+                'tblpole.longitude',
+                'tblpole.pole_condition',
+                'tblpole.created_at as pole_created_at',
+                'ps.poleSizeId',
+                'ps.SizeLabel',
+                'd.districtId',
+                'd.districtName',
+                'r.RegionName',
+                'user.firstname',
+                'user.lastname'
+            ])
+            ->join('tbl_polesize ps', 'ps.poleSizeId = tblpole.sizeId')
+            ->join('tbldistrict d', 'd.districtId = tblpole.district_id')
+            ->join('region r', 'r.RegionId = d.region_id')
+            ->join('tb_users user', 'user.user_pf = tblpole.created_by');
+
+        if ($poleId !== 0) {
+            $builder->where('tblpole.PoleId', $poleId);
+            return $builder->first();
+        }
+
+        if(count($conditions) > 0) {
+            foreach ($conditions as $key => $value) {
+                $builder->where($key, $value);
+            }
+        }
+
+        if(count($conditionsNot) > 0) {
+            foreach ($conditionsNot as $key => $value) {
+                $builder->where($key.' !=', $value);
+            }
+        }
+
+        return $builder
+                ->orderBy('tblpole.created_at', 'DESC')
+                ->findAll();
+    }
 }

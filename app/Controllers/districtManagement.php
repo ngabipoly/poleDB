@@ -3,17 +3,20 @@ namespace App\Controllers;
 
 use App\Models\DistrictModel;
 use App\Models\RegionModel;
+use App\Models\PoleModel;
 helper('App\Helpers\CustomHelpers');
 
 class DistrictManagement extends BaseController
 {
     protected $districtModel;
     protected $regionModel;
+    protected $poleModel;
 
     public function __construct()
     {
         $this->districtModel = new DistrictModel();
         $this->regionModel = new RegionModel();
+        $this->poleModel = new PoleModel();
     }
 
     public function index()
@@ -45,7 +48,7 @@ class DistrictManagement extends BaseController
         try {
             $model = $this->districtModel;
             $data = [
-                        'name' => $this->request->getPost('district_name'),
+                        'districtName' => $this->request->getPost('district_name'),
                         'code' => $this->request->getPost('district_code'),
                         'region_id' => $this->request->getPost('region_id')
                     ];
@@ -58,7 +61,7 @@ class DistrictManagement extends BaseController
                 'success', 
                 200,  
                 true, 
-                base_url('public/districts')
+                base_url('districts')
             );       
         } catch (\Exception $e) {
             // Log the error message
@@ -85,7 +88,7 @@ public function editDistrict($district_id)
         $district_region_id = $this->request->getPost('region_id');
 
         $updateData = [
-            'name'      => $district_name,
+            'districtName'      => $district_name,
             'code'      => $district_code,
             'region_id' => $district_region_id,
         ];
@@ -100,7 +103,7 @@ public function editDistrict($district_id)
             'success',
             200,
             true,
-            base_url('public/districts')
+            base_url('districts')
         );
     } catch (\Exception $e) {
         writeLog('Error editing district: ' . $e->getMessage());
@@ -114,6 +117,7 @@ public function editDistrict($district_id)
         try {
             $district_id = $this->request->getPost('delete_district_id');
             $district_name = $this->request->getPost('delete_district_name');
+            writeLog("Deleting district: $district_id - $district_name");
 
             if (empty($district_id)) {
             return jEncodeResponse([], 'Invalid district ID', 'error', 400, false);

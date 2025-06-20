@@ -31,29 +31,29 @@
                             <div class="card-body">
                                 <div class="col-md-12">
                                     <div class="table-responsive">
-                                        <table id="districts-table" class="table table-bordered table-striped">
-                                            <thead>
+                                        <table id="districts-table" class="table table-bordered table-striped table-hover data-table">
+                                            <thead class="text-sm text-dark">
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>Region Code</th>
-                                                    <th>Region Name</th>
-                                                    <th>District Code</th>
-                                                    <th>District Name</th>
-                                                    <th>Actions</th>
+                                                    <th class="text-sm">ID</th>
+                                                    <th class="text-sm">Region Code</th>
+                                                    <th class="text-sm">Region Name</th>
+                                                    <th class="text-sm">District Code</th>
+                                                    <th class="text-sm">District Name</th>
+                                                    <th class="text-sm">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php 
                                                     foreach ($districts as $district) {
                                                         echo "<tr>
-                                                                <td>{$district['id']}</td>
-                                                                <td>{$district['RegionCode']}</td>
-                                                                <td>{$district['RegionName']}</td>
-                                                                <td>{$district['code']}</td>
-                                                                <td>{$district['name']}</td>
-                                                                <td>
-                                                                    <button class='btn btn-info btn-xs edit-district' data-toggle='modal' data-target='#district-modal'  data-district-id='{$district['id']}' data-district-region-code='{$district['RegionCode']}' data-district-region-name='{$district['RegionName']}' data-district-code='{$district['code']}' data-district-name='{$district['name']}' data-region-id='{$district['region_id']}'><i class='fas fa-edit'></i></button>
-                                                                    <button class='btn btn-danger btn-xs delete-district' data-district-id='{$district['id']}' data-district-name='{$district['name']}' data-region-name='{$district['RegionName']}' data-toggle='modal' data-target='#delete-modal'> <i class='fas fa-trash'></i></button>
+                                                                <td class='text-sm'>{$district['districtId']}</td>
+                                                                <td class='text-sm'>{$district['RegionCode']}</td>
+                                                                <td class='text-sm'>{$district['RegionName']}</td>
+                                                                <td class='text-sm'>{$district['code']}</td>
+                                                                <td class='text-sm'>{$district['districtName']}</td>
+                                                                <td class='text-sm'>
+                                                                    <button class='btn btn-info btn-xs edit-district' data-toggle='modal' data-target='#district-modal'  data-district-id='{$district['districtId']}' data-district-region-code='{$district['RegionCode']}' data-district-region-name='{$district['RegionName']}' data-district-code='{$district['code']}' data-district-name='{$district['districtName']}' data-region-id='{$district['region_id']}'><i class='fas fa-edit'></i></button>
+                                                                    <button class='btn btn-danger btn-xs delete-district' data-district-id='{$district['districtId']}' data-district-name='{$district['districtName']}' data-region-name='{$district['RegionName']}' data-toggle='modal' data-target='#delete-modal'> <i class='fas fa-trash'></i></button>
                                                                 </td>
                                                               </tr>";
                                                     }

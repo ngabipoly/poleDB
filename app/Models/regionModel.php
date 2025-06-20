@@ -91,5 +91,24 @@ class RegionModel extends Model
     {
         return $this->delete($id);
     }
+
+    public function getRegionsWithPolesCount()
+    {
+        return $this->select('region.*, COUNT(tblpole.poleId) as poles_count')
+                    ->join('tbldistrict', 'region.RegionId = tbldistrict.region_id', 'left')
+                    ->join('tblpole', 'tbldistrict.districtId = tblpole.district_id', 'left')
+                    ->groupBy('region.RegionId','pole_condition')
+                    ->findAll();
+    }
+    public function getPoleConditionsPerRegion()
+    {
+        return $this->select('trim(RegionName) as RegionName, p.pole_condition, COUNT(p.PoleId) as count')
+                    ->join('tbldistrict', 'region.RegionId = tbldistrict.region_id', 'left')
+                    ->join('tblpole p', 'tbldistrict.districtId = p.district_id and p.deleted = 0', 'left')
+                    ->groupBy('RegionName, p.pole_condition')
+                    ->orderBy('RegionName')
+                    ->findAll();
+    }
+
 }
 

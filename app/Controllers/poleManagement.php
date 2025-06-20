@@ -13,21 +13,23 @@ class PoleManagement extends Controller
     protected $districtModel;
     protected $regionModel;
     protected $poleSizeModel;
+    protected $user;
+    protected $session;
 
     public function __construct()
     {
         $this->poleModel = new PoleModel();
         $this->districtModel = new DistrictModel();
         $this->poleSizeModel = new PoleSizeModel();
+        $this->regionModel = new RegionModel();
+        $this->session = session();
+        $this->user = $this->session->get('userData');
     }
     public function index()
     {
-        $data = ['sizes' => $this->poleSizeModel->findAll()];
-        $data['poles'] = $this->poleModel
-                                    ->join('tbl_polesize ps', 'ps.poleSizeId = sizeId')
-                                    ->join('tbldistrict d', 'd.id = district_id')
-                                    ->join('region r', 'r.RegionId = d.region_id')
-                                    ->findAll();
+        $data['user'] = $this->user;
+        $data['sizes'] =  $this->poleSizeModel->findAll();
+        $data['poles'] = $this->poleModel->getPole( 0, [], [ 'pole_condition' => 'stolen']);
         $data['page'] = 'Pole Management';        
         $data['districts'] = $this->districtModel
                                     ->join('region r', 'region_id =RegionId')
@@ -67,7 +69,8 @@ class PoleManagement extends Controller
                 'district_id' => $district_id,
                 'PoleCode'    => $pole_code,
                 'sizeId'   => $pole_size,
-                'pole_condition' => $pole_condition
+                'pole_condition' => $pole_condition,
+                'created_by' => $this->user['pfNumber']
             ];
 
             if (!$this->poleModel->insert($poleData)) {
@@ -117,7 +120,8 @@ class PoleManagement extends Controller
                 'longitude'   => $this->request->getPost('pole_longitude'),
                 'district_id' => $this->request->getPost('district_id'),
                 'pole_condition' => $this->request->getPost('pole_condition'),
-                'sizeId'      => $this->request->getPost('pole_size')
+                'sizeId'      => $this->request->getPost('pole_size'),
+                'last_updated_by'  => $this->user['pfNumber']
             ];
 
             if (!$this->poleModel->update($pole_id, $updateData)) {
@@ -164,6 +168,11 @@ class PoleManagement extends Controller
 
             $pole_code = $pole['PoleCode'];
             writeLog("Found pole: $id - $pole_code");
+
+            if(!$this->poleModel->update($id, ['deleted_by' => $this->user['pfNumber']])) {
+                writeLog("Failed to update pole: $id - $pole_code");
+                throw new \Exception("Failed to update pole: $id - $pole_code " . implode('<br/> ', $this->poleModel->errors()));
+            }
 
             if (!$this->poleModel->delete($id)) {
                 writeLog("Failed to delete pole: $id - $pole_code");
@@ -368,6 +377,28 @@ public function getNextPoleNumber($district_id)
             writeLog("Error checking poles for size: " . $e->getMessage());
             return false;
         }
+    }
+
+/**
+ * Fetches all pole data and returns it in JSON format.
+ *
+ * This function retrieves all pole entries from the database using the poleModel
+ * and returns the data encoded as a JSON response. If an error occurs during the
+ * retrieval process, it logs the error and returns an error response.
+ *
+ * @return \CodeIgniter\HTTP\Response JSON response containing pole data or an error message.
+ */
+
+    public function mapData()
+    {
+        try{
+            $data = $this->poleModel->getPole( 0, [], []);  
+            return $this->response->setJSON($data);  
+        } catch (\Exception $e) {
+            writeLog("Error fetching map data: " . $e->getMessage());
+            return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+        }            
+  
     }
 
 }

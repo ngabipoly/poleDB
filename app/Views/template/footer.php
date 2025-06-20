@@ -21,5 +21,13 @@
 <script src="<?php echo base_url();?>assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <!-- AdminLTE App -->
 <script src="<?php echo base_url();?>assets/js/adminlte.js"></script>
+<script>
+          $(function () {
+          setTimeout(function () {
+            console.log('Triggering click on dashboard link');
+            $('a[data-widget="iframe"][href="<?php echo base_url('dashboard') ?>"]').trigger('click');
+          }, 1000); // wait for iframe system
+        });
+</script>
 </body>
 </html>
