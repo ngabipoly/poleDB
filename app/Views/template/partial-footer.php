@@ -106,7 +106,10 @@
                 tooltip: {
                     mode: 'index',
                     intersect: false
-                }
+                },
+              legend: {
+                      position: 'bottom'
+              }
             },
             interaction: {
                 mode: 'nearest',
