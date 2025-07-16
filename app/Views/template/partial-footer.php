@@ -78,7 +78,7 @@
   <?php
     if($page === 'Dashboard'){ ?>
             // Load summary stats
-        $.getJSON("<?php echo base_url('/dashboard/summaryStats'); ?>", function (data) {
+        $.getJSON("<?php echo base_url('/dashboard/ summaryStats'); ?>", function (data) {
             console.log(data);
             $('#totalPoles').text(data.totalPoles);
             $('#totalDistricts').text(data.totalDistricts);
@@ -379,7 +379,7 @@
 
       const region_code = selectedOption.data('region-code');
       const region_name = selectedOption.data('region-name');
-      const region_id = selectedOption.data('region-id'); // Make sure this exists
+      const region_id = selectedOption.data('region-id');
       const district_code = selectedOption.data('district-code');
 
       const pole_code = `${region_code}-${district_code}`;
@@ -389,7 +389,7 @@
       $('#region_code').val(region_code);
       $('#region_name').val(region_name);
       $('#region_id').val(region_id);
-      $('#pole-code').val(pole_code);
+      $('#infra-code').val(pole_code);
   });
 
   // Pole Size Management
@@ -409,6 +409,9 @@
     $('#size-meteres').val(size);    
     $('#poleSizeModalLabel').text('Edit Pole Size');
   })
+
+  
+ 
 
   $(".delete-pole-size").click(function(){
     let id = $(this).data('id');
@@ -527,11 +530,8 @@ function initMap() {
                     popupEl.querySelector('.leaflet-popup-tip')?.classList.add(colorClass);
                 }
             });
-;
-
             markerCluster.addLayer(marker);
         });
-
         map.addLayer(markerCluster);
     });
 
@@ -541,41 +541,153 @@ function initMap() {
     });
 }
 
+//Pole Management Controls
+  $('.btn-infra').click(function(e){
+    let title = $(this).data('action');
+    let infra_type = $(this).data('infra-type');
 
-
-
-  $('#add-pole').click(function(e){
-      e.preventDefault();
-      $('#pole-id').val('');
-      $('#pole-code').val('');
-      $('#pole-size').val('');
-      $('#district-id').val('');
-      $('#latitude').val('');
-      $('#longitude').val('');
-      $('#pole-condition').val('');
-      $('#pole-action-title').text('Add New Pole');
+    //reset form
+    resetAllFields();
+    $('#elm-type').val(infra_type);
+    // Ensure district-id is editable when adding new infrastructure
+    $('#district-id').prop('readonly', false);
+    if (infra_type == 'Manhole') {
+      $('.pole-data').hide();
+      $('.manhole-data').show();
+      $('#circular-data').hide();
+      $('.non-circular-data').show();
+      $('.infra-form').data('initmsg', 'Adding New Manhole');
+    }else if (infra_type == 'Pole') {
+      $('.manhole-data').hide();
+      $('.pole-data').show();
       $('#pole-condition option[value="stolen"]').remove();
-  })
-  $('.edit-pole').click(function(){
-      let pole_id = $(this).data('pole-id');
-      let pole_code = $(this).data('pole-code');
-      let pole_size = $(this).data('pole-size');
-      let district_id = $(this).data('district-id');
-      let pole_lat  = $(this).data('latitude');
-      let pole_lng  = $(this).data('longitude');
-      let pole_condition = $(this).data('pole-condition');
+      $('.infra-form').data('initmsg', 'Adding new pole');
+    }
 
-      $('#pole-condition').append('<option value="stolen">Stolen</option>');
-      $('#pole-id').val(pole_id);
-      $('#pole-code').val(pole_code);
-      $('#pole-size').val(pole_size);
-      $('#pole-condition').val((pole_condition || '').toLowerCase());
-      $('#district-id').val(district_id);
-      $('#latitude').val(pole_lat);
-      $('#longitude').val(pole_lng);
+      $('#action-title').text(title);
+  });
 
-      $('#pole-action-title').text(`Edit ${pole_code} Pole`);
-  })
+  $('#manhole-circular').change(function(){
+    if ($(this).is(':checked')) {
+      $('#circular-data').show();
+      $('.non-circular-data').hide();
+    }else{
+      $('#circular-data').hide();
+      $('.non-circular-data').show();
+    }
+  });
+
+  // Switch between Manhole and Pole listings
+  $('.list-switch').click(function(e) {
+    e.preventDefault();
+    let show_list = $(this).data('show');
+    let hide_list = $(this).data('hide');
+    $(show_list).show();
+    $(hide_list).hide();
+    $(".data-table").DataTable().columns.adjust().responsive.recalc();
+  });
+
+  $('#add-media-type').click(function(e){
+      e.preventDefault();
+      $('#carryTypeId').val('');
+      $('#carryTypeName').val('');
+      $('#carryTypeDescription').val('');
+      $('#media-type-modalLabel').text('Add New Media Type');
+    });
+
+  $('.edit-media-type').click(function(e){
+      e.preventDefault();      
+      let media_type_id = $(this).data('id');
+      let media_type_name = $(this).data('name');
+      let media_type_desc = $(this).data('description');
+      $('#carryTypeId').val(media_type_id);
+      $('#carryTypeName').val(media_type_name);
+      $('#carryTypeDescription').val(media_type_desc);
+      $('#media-type-modalLabel').text(`Edit Media Type ${media_type_name}`);
+    });
+
+    $('.delete-media-type').click(function(e){
+        e.preventDefault();      
+        let media_type_id = $(this).data('delete-media-type-id');
+        let media_type_name = $(this).data('delete-media-type-name');
+        $('#deleteCarryTypeId').val(media_type_id);
+        $('#deleteCarryTypeName').val(media_type_name);
+        $('#delMediaTypeName').text(media_type_name); 
+    });
+
+    //add media capacity
+    $('#add-media-capacity').click(function(e){
+        e.preventDefault();
+        $('#carryCapacityId').val('');
+        $('#carryTypeId').val(''); 
+        $('#carryCapacityLabel').val('');
+        $('#carryCapacityValue').val('');
+        $('#carryCapacityDescription').text('');
+        $('#media-capacity-modalLabel').text('Add New Media Capacity');
+    });
+
+    //Edit Carry capacities
+    $('.edit-media-capacity').click(function(e){
+        e.preventDefault();
+        let media_capacity_id = $(this).data('id');
+        let media_capacity_label = $(this).data('label');
+        let media_capacity_value = $(this).data('value');
+        let media_type_id = $(this).data('type-id');
+        let media_description = $(this).data('description');
+
+        $('#carryCapacityId').val(media_capacity_id);
+        $('#carryCapacityLabel').val(media_capacity_label);
+        $('#carryCapacityValue').val(media_capacity_value);
+        $('#carryTypeId').val(media_type_id);
+        $('#carryCapacityDescription').text(media_description);
+        $('#media-capacity-modalLabel').text(`Edit Media Capacity ${media_capacity_label}`);
+    })
+
+    //Delete Media Capacity
+    $('.delete-media-capacity').click(function(e){
+        e.preventDefault();
+        let media_capacity_id = $(this).data('id');
+        let media_capacity_label = $(this).data('label');
+
+        $('#deleteCarryCapacityId').val(media_capacity_id);
+        $('#deleteCarryCapacityLabel').val(media_capacity_label);
+        $('#delCapacityLabel').text(media_capacity_label); 
+    });
+
+
+
+    $(document).on('click', '.edit-infra', function () {
+        resetAllFields();
+        const data = {
+            element_id: $(this).data('element-id'),
+            element_code: $(this).data('element-code'),
+            pole_size: $(this).data('pole-size'),
+            district_id: $(this).data('district-id'),
+            latitude: $(this).data('latitude'),
+            longitude: $(this).data('longitude'),
+            pole_type: $(this).data('pole-type'),
+            element_condition: $(this).data('element-condition'),
+            title: $(this).data('infra-title'),
+            infra_type: $(this).data('infra-type'),
+            manhole_length: $(this).data('manhole-length'),
+            manhole_width: $(this).data('manhole-width'),
+            manhole_depth: $(this).data('manhole-depth'),
+            manhole_diameter: $(this).data('manhole-diameter'),
+        };
+
+        populateCommonFields(data);
+
+        switch (data.infra_type) {
+            case 'Pole':
+                showPoleFields(data);
+                break;
+            case 'Manhole':
+                showManholeFields(data);
+                break;
+            default:
+                console.warn('Unhandled infra type:', data.infra_type);
+        }
+    });
 
   $('.delete-pole').click(function(){
       let pole_id = $(this).data('pole-id');
@@ -634,6 +746,69 @@ function initMap() {
       let target = $('#target-elm')
       let msg = $(this).data('initmsg');
       db_submit(target,$(this),msg);
+    });
+
+
+   function resetAllFields() {
+        $('#element-form').trigger('reset');
+        $('.pole-data, .manhole-data, #circular-data, .non-circular-data').hide();
+        $('#manhole-circular').prop('checked', false);
+        $('#pole-size, #pole-type').val('');
+        $('#elm-id, #infra-code, #latitude, #longitude, #elm-condition, #district-id, #elm-type').val('');
+        $('#district-id').prop('disabled', false);
+    }
+
+    function populateCommonFields(data) {
+        $('#elm-id').val(data.element_id);
+        $('#elm-type').val(data.infra_type);
+        $('#infra-code').val(data.element_code);
+        $('#elm-condition').val(data.element_condition || '');
+        $('#district-id').val(data.district_id).prop('disabled', true);
+        $('#latitude').val(data.latitude);
+        $('#longitude').val(data.longitude);
+        $('#infra-type').val(data.infra_type);
+        $('#action-title').text(`${data.title} ${data.element_code}`);
+        $('.infra-form').data('initmsg', data.title);
+    }
+
+    function showPoleFields(data) {      
+        $('.pole-data').show();
+        $('#pole-size').val(data.pole_size);
+        $('#pole-type').val(data.pole_type);
+
+        // Ensure 'Stolen' option is present (you may need to adapt this logic)
+        if ($('#elm-condition option[value="Stolen"]').length === 0) {
+            $('#elm-condition').append('<option value="Stolen">Stolen</option>');
+        }
+
+    }
+
+    function showManholeFields(data) {
+        $('.manhole-data').show();
+        $('#manhole-width').val(data.manhole_width || 0);
+        $('#manhole-length').val(data.manhole_length || 0);
+        $('#manhole-depth').val(data.manhole_depth || 0);
+        $('#manhole-diameter').val(data.manhole_diameter || 0);
+
+        const isCircular = parseFloat(data.manhole_diameter || 0) > 0;
+        $('#manhole-circular').prop('checked', isCircular);
+
+        toggleManholeShapeFields(isCircular);
+    }
+
+    function toggleManholeShapeFields(isCircular) {
+        if (isCircular) {
+            $('#circular-data').show();
+            $('.non-circular-data').hide();
+        } else {
+            $('#circular-data').hide();
+            $('.non-circular-data').show();
+        }
+    }
+
+    // Handle circular switch toggle
+    $('#manhole-circular').on('change', function () {
+        toggleManholeShapeFields($(this).is(':checked'));
     });
 
 

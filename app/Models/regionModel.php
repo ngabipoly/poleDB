@@ -92,23 +92,54 @@ class RegionModel extends Model
         return $this->delete($id);
     }
 
-    public function getRegionsWithPolesCount()
+    public function getInfraCount(string $elmType = '', string $alias = 'count', ?array $filters = [])
     {
-        return $this->select('region.*, COUNT(tblpole.poleId) as poles_count')
-                    ->join('tbldistrict', 'region.RegionId = tbldistrict.region_id', 'left')
-                    ->join('tblpole', 'tbldistrict.districtId = tblpole.district_id', 'left')
-                    ->groupBy('region.RegionId','pole_condition')
-                    ->findAll();
-    }
-    public function getPoleConditionsPerRegion()
-    {
-        return $this->select('trim(RegionName) as RegionName, p.pole_condition, COUNT(p.PoleId) as count')
-                    ->join('tbldistrict', 'region.RegionId = tbldistrict.region_id', 'left')
-                    ->join('tblpole p', 'tbldistrict.districtId = p.district_id and p.deleted = 0', 'left')
-                    ->groupBy('RegionName, p.pole_condition')
-                    ->orderBy('RegionName')
+        $builder = $this->select('region.RegionName, COUNT(ne.elmId) as ' . $alias)
+                        ->join('tbldistrict d', 'region.RegionId = d.region_id', 'left')
+                        ->join('tbl_network_infra_elements ne', 'd.districtId = ne.district_id AND ne.deleted = 0', 'left');
+
+        if (!empty($elmType)) {
+            $builder->where('ne.elmType', $elmType);
+        }
+
+        if (!empty($filters)) {
+            foreach ($filters as $field => $value) {
+                if (is_array($value)) {
+                    $builder->whereIn($field, $value);
+                } else {
+                    $builder->where($field, $value);
+                }
+            }
+        }
+
+        return $builder->groupBy('region.RegionName')
+                    ->orderBy('region.RegionName')
                     ->findAll();
     }
 
+        public function getInfraConditionCount(string $elmType = '', ?array $filters = [])
+    {
+        $builder = $this->select('region.RegionName, ne.pole_condition, COUNT(ne.elmId) as count')
+                        ->join('tbldistrict d', 'region.RegionId = d.region_id', 'left')
+                        ->join('tbl_network_infra_elements ne', 'd.districtId = ne.district_id AND ne.deleted = 0', 'left');
+
+        if (!empty($elmType)) {
+            $builder->where('ne.elmType', $elmType);
+        }
+
+        if (!empty($filters)) {
+            foreach ($filters as $field => $value) {
+                if (is_array($value)) {
+                    $builder->whereIn($field, $value);
+                } else {
+                    $builder->where($field, $value);
+                }
+            }
+        }
+
+        return $builder->groupBy(['region.RegionName', 'ne.pole_condition'])
+                    ->orderBy('region.RegionName')
+                    ->findAll();
+    }
 }
 

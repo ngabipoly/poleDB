@@ -5,6 +5,10 @@ use App\Models\PoleModel;
 use App\Models\DistrictModel;
 use App\Models\RegionModel;
 use App\Models\PoleSizeModel;
+use App\Models\CarryCapacityModel;
+use App\Models\CarryTypeModel;
+
+
 helper('App\Helpers\CustomHelpers');
 
 class PoleManagement extends Controller
@@ -13,6 +17,8 @@ class PoleManagement extends Controller
     protected $districtModel;
     protected $regionModel;
     protected $poleSizeModel;
+    protected $capacityModel;
+    protected $carryTypeModel;
     protected $user;
     protected $session;
 
@@ -22,6 +28,8 @@ class PoleManagement extends Controller
         $this->districtModel = new DistrictModel();
         $this->poleSizeModel = new PoleSizeModel();
         $this->regionModel = new RegionModel();
+        $this->capacityModel = new CarryCapacityModel();
+        $this->carryTypeModel = new CarryTypeModel();
         $this->session = session();
         $this->user = $this->session->get('userData');
     }
@@ -194,7 +202,6 @@ class PoleManagement extends Controller
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
     }
-
 public function getNextPoleNumber($district_id)
 {
     $totalPoles = $this->poleModel

@@ -110,3 +110,7 @@ define('MAX_LOGIN_ATTEMPTS', 5);
 define('LOGIN_ATTEMPT_TIMEOUT', 15 * MINUTE); // 15 minutes
 define('LOGIN_ATTEMPT_LOG', FCPATH.'login_attempts'.DIRECTORY_SEPARATOR);
 define('LOGIN_ATTEMPT_LOG_FILE', LOGIN_ATTEMPT_LOG.'log_'.date('Ymd').'.log');
+define('POLE_KEY', 'PL');
+define('MANHOLE_KEY', 'MH');
+define('BUILDING_KEY', 'BL');
+define('OLTE_KEY', 'OL');

@@ -77,11 +77,16 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header bg-primary">
-                            <h3 class="card-title"><i class="fas fa-broadcast-tower"></i> Manage Poles</h3>
+                            <h3 class="card-title"><i class="fas fa-broadcast-tower"></i> Manage Infrastructure</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-xs bg-gray-dark" id="add-pole" data-toggle="modal" data-target="#pole-modal" onclick="getLocation();">
-                                    <i class="fas fa-plus"></i> Add Pole
-                                </button>
+                                <div class="btn-group float-right mr-2 mt-1 mb-1">
+                                    <button type="button" class="btn btn-xs bg-gray-dark btn-infra pr-2 pl-2 border-right border-white" id="add-pole" data-action="Add Pole" data-infra-type="pole" data-toggle="modal" data-target="#infrastructure-modal" onclick="getLocation();">
+                                        <i class="fas fa-plus-circle"></i> Pole
+                                    </button>
+                                    <button type="button" class="btn btn-xs bg-gray-dark btn-infra pr-2 pl-2 border-right border-white" id="add-manhole" data-action="Add Manhole" data-infra-type="manhole" data-toggle="modal" data-target="#infrastructure-modal" onclick="getLocation();">
+                                        <i class="fas fa-plus-circle"></i> Manhole
+                                    </button>                                
+                                </div>
                             </div>
                         </div>
                         <div class="card-body">
@@ -175,20 +180,21 @@
 </div>
 
 <!-- Add/Edit Pole Modal -->
-<div class="modal fade" id="pole-modal">
-    <div class="modal-dialog">
+<div class="modal fade" id="infrastructure-modal">
+    <div class="modal-dialog modal-md">
         <div class="modal-content">
-            <form action="pole-management/store" method="post" class="db-submit" id="pole-form" data-initmsg="Adding new pole">
+            <form action="pole-management/store" method="post" class="db-submit infra-form" id="pole-form" data-initmsg="Adding new pole">
                 <?php echo csrf_field(); ?>
                 <div class="modal-header">
-                    <h5 class="modal-title"><span id="pole-action-title"> Add Pole </span><i class="fas fa-tower"></i></h5>
+                    <h5 class="modal-title"><span id="infa-action-title">Add Pole </span><i class="fas fa-tower"></i></h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="pole_id" id="pole-id">
+                    <input type="hidden" name="elmId" id="elm-id">
+                    <input type="hidden" name="elmType" id="elm-type">
                     <div class="form-group">
                         <label for="district-code">District</label>
-                        <select name="district_id" id="district-id" class="form-control select2">
+                        <select name="districtId" id="district-id" class="form-control select2">
                             <option value="">Select District</option>
                             <?php
                             $grouped = [];
@@ -237,21 +243,49 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group pole-data">
+                        <label for="pole-type">Pole Type</label>
+                        <select name="poleTypeId" id="pole-type" class="form-control select2">
+                            <option value="">--Select Type--</option>
+                            <?php foreach ($pole_types as $pole_type) { echo '<option value="' . $pole_type['TypeId'] . '">' . $pole_type['TypeName'] . '</option>'; } ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group pole-data">
                         <label for="pole-size">Pole Size</label>
-                        <select name="pole_size" id="pole-size" class="form-control select2">
+                        <select name="poleSizeId" id="pole-size" class="form-control select2">
                             <option value="">--Select Size--</option>
                             <?php foreach ($sizes as $size) { echo '<option value="' . $size['poleSizeId'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="pole-condition">Condition</label>
-                        <select name="pole_condition" id="pole-condition" class="form-control select2">
+                    <div class="form-group pole-data">
+                        <label for="elm-condition">Condition</label>
+                        <select name="elmCondition" id="elm-condition" class="form-control select2">
                             <option value="">--Select Condition--</option>
                             <option value="good">Good</option>
                             <option value="re-used">Re-Used</option>
                             <option value="damaged">Damaged</option>
                         </select>
+                    </div>
+                    
+                    <div class="form-group manhole-data">
+                        <label for="manhole-width">Manhole Width</label>
+                        <input type="number" class="form-control" id="manhole-width" name="manholeWidth" value="0">
+                    </div>
+
+                    <div class="form-group manhole-data">
+                        <label for="manhole-length">Manhole Length</label>
+                        <input type="number" class="form-control" id="manhole-length" name="manholeLength" value="0">
+                    </div>
+
+                    <div class="form-group manhole-data">
+                        <label for="manhole-diameter">Manhole Diameter</label>
+                        <input type="number" class="form-control" id="manhole-diameter" name="manholeDiameter" value="0">
+                    </div>
+
+                    <div class="form-group manhole-data">
+                        <label for="manhole-depth">Manhole Depth</label>
+                        <input type="number" class="form-control" id="manhole-depth" name="manholeDepth" value="0">
                     </div>
                 </div>
 

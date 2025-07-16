@@ -33,6 +33,22 @@ $routes->post('pole-management/delete-pole-type', 'PoleManagement::deletePoleTyp
 $routes->get('reverse-geocode', 'Location::reverseGeocode');
 $routes->get('pole/getPoleMapData', 'PoleManagement::mapData');
 
+//Infra Management Routes
+$routes->get('infrastructure', 'InfraManagement::index');
+$routes->get('infrastructure/getMapData', 'InfraManagement::mapData');
+$routes->get('infrastructure/getData', 'InfraManagement::getData');
+$routes->post('infrastructure/save', 'InfraManagement::storeElement');
+$routes->post('infrastructure/delete', 'InfraManagement::deleteElement');
+$routes->post('infrastructure/getCableCapacity', 'InfraManagement::getCableCapacityByCarryType');
+$routes->post('infrastructure/get-cable-capacity', 'InfraManagement::getCableCapacityByCarryType');
+
+//media management
+$routes->get('infrastructure/media-types', 'MediaManagement::listMediaTypes');
+$routes->get('infrastructure/media-capacities', 'MediaManagement::listMediaCapacities');
+$routes->post('infrastructure/save-media', 'MediaManagement::saveDetails');
+$routes->post('infrastructure/delete-media-type', 'MediaManagement::deleteMediaType');
+$routes->post('infrastructure/save-media-capacity', 'MediaManagement::saveDetails');
+$routes->post('infrastructure/delete-media-capacity', 'MediaManagement::deleteMediaCapacity');
 
 //User Management Routes
 $routes->get('administration/usr-admin', 'UserRoleMgr::index');
