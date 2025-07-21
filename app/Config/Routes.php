@@ -39,8 +39,9 @@ $routes->get('infrastructure/getMapData', 'InfraManagement::mapData');
 $routes->get('infrastructure/getData', 'InfraManagement::getData');
 $routes->post('infrastructure/save', 'InfraManagement::storeElement');
 $routes->post('infrastructure/delete', 'InfraManagement::deleteElement');
-$routes->post('infrastructure/getCableCapacity', 'InfraManagement::getCableCapacityByCarryType');
 $routes->post('infrastructure/get-cable-capacity', 'InfraManagement::getCableCapacityByCarryType');
+$routes->post('infrastructure/get-source-element-candidates', 'InfraManagement::getSourceElementCandidates');
+$routes->post('infrastructre/linkMedia', 'InfraManagement::linkMediaToElement');
 
 //media management
 $routes->get('infrastructure/media-types', 'MediaManagement::listMediaTypes');

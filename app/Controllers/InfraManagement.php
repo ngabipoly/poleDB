@@ -9,6 +9,7 @@ use App\Models\PoleSizeModel;
 use App\Models\CarryTypeModel;
 use App\Models\CarryCapacityModel;
 use App\Models\PoleCarryingModel;
+use App\Models\InfraCarryModel;
 
 class InfraManagement extends Controller
 {
@@ -26,6 +27,8 @@ class InfraManagement extends Controller
     protected $carryTypeModel;
     protected $capacityModel;
     protected $poleCarryingModel;
+    protected $carryModel;
+
 
 
     public function __construct()
@@ -38,6 +41,7 @@ class InfraManagement extends Controller
         $this->carryTypeModel = new CarryTypeModel();
         $this->capacityModel = new CarryCapacityModel();
         $this->poleCarryingModel = new PoleCarryingModel();
+        $this->carryModel = new InfraCarryModel();
         $this->session = session();
         $this->user = $this->session->get('userData');
     }
@@ -228,8 +232,8 @@ class InfraManagement extends Controller
             $data['cableCapacityDesc'] = $this->request->getPost('cableCapacityDesc');
             $data['cableCapacityId'] = $this->request->getPost('cableCapacityId');
             $data['cableCapacityStatus'] = $this->request->getPost('cableCapacityStatus');
+            return $data;
         }
-        return $data;
 
         if ($formType == 'carryType') {
             $data = $this->collectTypeData($formType);
@@ -284,6 +288,20 @@ class InfraManagement extends Controller
                 $data['olteTypeId'] = $this->request->getPost('olteTypeId');
             }
 
+            return $data;
+        }
+
+        if ($formType == 'linkMedia') {
+            writeLog("Getting media link data");
+            $data['carryId'] = $this->request->getPost('carryId');
+            $data['carryElement'] = $this->request->getPost('media-destination-element');
+            $data['carryingType'] = $this->request->getPost('media_type');
+            $data['carryCapacity'] = $this->request->getPost('media_capacity');
+            $data['sourceType'] = $this->request->getPost('media_source_type');
+            $data['carrySource'] = $this->request->getPost('source_element');
+            $data['carryNotes'] = $this->request->getPost('media_notes');
+            $data['carryAddBy'] = $this->user['pfNumber'];
+            writeLog("Media link data collected: " . json_encode($data));
             return $data;
         }
     }
@@ -405,7 +423,7 @@ class InfraManagement extends Controller
         try{
             $data = $this->collectInputData('carryingCables');
             if (!$this->infraModel->update($element, $data)) {
-                throw new \Exception(implode('<br>', $this->poleModel->errors()));
+                throw new \Exception(implode('<br>', $this->infraModel->errors()));
             }
             writeLog("Cables the pole $element is carrying updated successfully");
             return jEncodeResponse(
@@ -421,9 +439,39 @@ class InfraManagement extends Controller
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
     }  
-    
+
+    public function linkMediaToElement()
+    {
+        try {
+            $formType = $this->request->getPost('formType');
+            $data = $this->collectInputData($formType);
+            writeLog('Form Type: ' . $formType . ' Data: ' . json_encode($data));
+
+            $carryId = (int)$data['carryId'];
+
+            if($carryId > 0) {
+                if(!$this->carryModel->update($carryId, $data)) {
+                    writeLog("Failed to update media linked to element with ID: $carryId". implode('<br>', $this->carryModel->errors()));
+                    throw new \Exception(implode('<br>', $this->carryModel->errors()));
+                }
+                writeLog("Media linked to element updated successfully with ID: $carryId");
+                return jEncodeResponse($data, 'Media linked to element updated successfully', 'success', 200, true);
+            } 
+
+            if(!$this->carryModel->insert($data)) {
+                writeLog("Failed to link media to element". implode('<br>', $this->carryModel->errors()));
+                throw new \Exception(implode('<br>', $this->carryModel->errors()));
+            }  
+
+            return jEncodeResponse($data, 'Media linked to element successfully', 'success', 200, true, 'infrastructure');
+
+        } catch (\Exception $e) {
+            writeLog("Error linking media to element: " . $e->getMessage());
+            return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+        }
+    }
     /**
-     * Get capacity infor mation for the provided carry/media type.
+     * Get capacity information for the provided carry/media type.
      * This method retrieves the cable capacity based on the carry type.
      * 
      * @param int $carryTypeId The ID of the carry type.
@@ -446,13 +494,79 @@ class InfraManagement extends Controller
             }
 
             // Retrieve cable capacity based on carry type
-            $capacities = $this->capacityModel->where('carryTypeId', $carryTypeId)->findAll();
-            return $this->response->setJSON($capacities);
+            $capacities = $this->capacityModel->where('carryType', $carryTypeId)->findAll();
+            if (empty($capacities)) {
+                writeLog("No cable capacities found for Carry Type ID: $carryTypeId");
+                throw new \Exception('No cable capacities found for the specified Carry Type');
+            }
+            writeLog("Cable capacities retrieved successfully for Carry Type ID: $carryTypeId".json_encode($capacities));
+            return jEncodeResponse(
+                $capacities,
+                'Cable capacities retrieved successfully',
+                'success',
+                200,
+                true
+            );
         } catch (\Exception $e) {
             writeLog("Error retrieving cable capacity: " . $e->getMessage());
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
     }
+
+    /**
+     * Get a list of source element candidates of the specified Element type.
+     * 
+     * This method retrieves a list of source elements of the specified type
+     * that are not deleted and are not the destination element.
+     * 
+     * @return array The list of source element candidates.
+     */
+    public function getSourceElementCandidates()
+    {
+        try {
+            writeLog('Retrieving source element candidates...');
+            $candidates = null;
+            $elementType = $this->request->getPost('elmType');
+            $destElementId = $this->request->getPost('destElmId');
+            writeLog("Retrieving source element candidates of type: $elementType for destination element ID: $destElementId");
+
+            if (empty($elementType) || empty($destElementId)) {
+                writeLog('Source element type and destination element ID are required.');
+                throw new \Exception('Source element type and destination element ID are required.');
+            }
+
+            $candidates = $this->infraModel
+                ->where('elmType', $elementType)
+                ->where('elmId !=', $destElementId)
+                ->where('isElmDeleted', 0)
+                ->findAll();
+
+            if ($this->infraModel->db->error()['code'] !== 0) {
+                $err = $this->infraModel->db->error();
+                writeLog('DB error: ' . json_encode($err));
+                throw new \Exception('Database error fetching candidates.');
+            }
+
+            if (empty($candidates)) {
+                writeLog('No source element candidates found.');
+                throw new \Exception('No source element candidates found.');
+            }
+
+            return jEncodeResponse($candidates, 'Source elements retrieved successfully', 'success', 200, true);
+        } catch (\Exception $e) {
+            writeLog('Error retrieving source element candidates: ' . $e->getMessage());
+            return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+        }
+    }
+
+    /**
+     * Get the next code for a given district and element type.
+     * This method generates a sequential code based on the number of existing elements.
+     *
+     * @param int $districtId The ID of the district.
+     * @param string $elementType The type of the element (e.g., 'Pole', 'Manhole').
+     * @return string The next code formatted as a 6-digit string.
+     */
 
     public function getNextCode($districtId, $elementType)
     {

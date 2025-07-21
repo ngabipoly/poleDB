@@ -452,41 +452,51 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-link"></i> Link Media to Pole</h5>
+                <h5 class="modal-title"><i class="fas fa-link"></i> Link Media to <span id="destination-media-code"></span> </h5>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
-            <div class="modal-body">
-                <div class="form-group"></div>
-                <div class="form-group">
-                    <label for="media-type">Cable Type</label>
-                    <select class="form-control" id="media-type" name="media_type">
-                        <option value="">--Select Cable Type--</option>
-                        <?php foreach ($media_types as $media_type): ?>
-                            <option value="<?php echo esc($media_type->carryTypeId); ?>"><?php echo esc($media_type->carryTypeName); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+            <form action="<?php echo base_url('infrastructre/linkMedia') ?>" method="post" class="db-submit" id="media-link-form" data-initmsg="Linking media">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="media-destination-element" id="media-destination-element" value="">
+                <input type="hidden" name="media-destination-code" id="media-destination-code" value="">
+                <input type="hidden" name="carryId" id="carry-id" value="0">
+                <input type="hidden" name="formType" value="linkMedia" class="">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="media-type">Cable Type</label>
+                        <select class="form-control" id="media-type" name="media_type">
+                            <option value="">--Select Cable Type--</option>
+                            <?php foreach ($media_types as $media_type): ?>
+                                <option value="<?php echo esc($media_type->carryTypeId); ?>"><?php echo esc($media_type->carryTypeName); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="media-capacity">Cable Capacity</label>
+                        <select class="form-control" id="media-capacity" name="media_capacity">
+                            
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="media-source-type">Source Type</label>
+                        <select class="form-control" id="media-source-type" name="media_source_type">
+                            <option value="">--Select Source Element Type--</option>
+                            <option value="Pole">Pole</option>
+                            <option value="Manhole">Manhole</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="source-element">Source Element</label>
+                        <select class="form-control" id="source-element" name="source_element">
+                            <option value="">--Select Origin Element--</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="media-capacity">Cable Capacity</label>
-                    <select class="form-control" id="media-capacity" name="media_capacity">
-                       
-                    </select>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Link</button>
                 </div>
-                <div class="form-group">
-                    <label for="media-source-type">Source Type</label>
-                    <select class="form-control" id="media-source-type" name="media_source_type">
-                        <option value="">--Select Source Element Type--</option>
-                        <option value="Pole">Pole</option>
-                        <option value="Manhole">Manhole</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="media-link">Source Element</label>
-                    <select class="form-control" id="media-link" name="media_link">
-                        <option value="">--Select Origin Element--</option>
-                    </select>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>

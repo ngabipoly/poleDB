@@ -655,6 +655,93 @@ function initMap() {
     });
 
 
+    /**
+     * Infrastructure Linking and Carried Media Type and Capacity Management
+     * This section handles the dynamic loading of media capacities
+     * based on the selected media type in the dropdown.
+     */
+
+    $(document).on('click', '.link-infra', function(e) {
+      e.preventDefault();
+      const mediaTypeId = $(this).data('element-id');
+      const mediaTypeName = $(this).data('element-code');
+      const mediaDestinationType = $(this).data('infra-type');
+
+      $('#destination-media-code').text(`${mediaDestinationType} ${mediaTypeName}`);
+      $('#media-destination-element').val(mediaTypeId);
+      $('#media-destination-code').val(mediaTypeName);
+    });
+
+    //Get media capacities depending on selected media type
+    // Utility function to load media capacities by type
+    function loadMediaCapacities(mediaTypeId, mediaTypeName, $capacitySelect) {
+      $capacitySelect.empty();
+      $.ajax({
+        url: "<?php echo base_url('infrastructure/get-cable-capacity') ?>",
+        type: "POST",
+        data: { carryTypeId: mediaTypeId },
+        success: function(response) {
+          const data = JSON.parse(response);
+          if (data.status === 'success') {
+            $capacitySelect.html('<option value="">--Select Capacity--</option>');
+            toastr.success(`Loaded capacities for ${mediaTypeName}`);
+            const options = data.data.map(capacity =>
+              `<option value="${capacity.carryCapacityId}">${capacity.capacityLabel}</option>`
+            );
+            $capacitySelect.append(options.join(''));
+          } else {
+            toastr.error(`Error loading capacities for ${mediaTypeName} - <br/>${data.message}`);
+          }
+        },
+        error: function(xhr) {
+          console.error('Error loading media capacities:', xhr);
+        }
+      });
+    }
+
+    // Bind change event for media type dropdown
+    $('#media-type').change(function() {
+      const selectedOption = $(this).find("option:selected");
+      const mediaTypeId = selectedOption.val();
+      const mediaTypeName = selectedOption.text();
+      $('#media-type-id').val(mediaTypeId);
+      $('#media-type-name').val(mediaTypeName);
+      loadMediaCapacities(mediaTypeId, mediaTypeName, $('#media-capacity'));
+    });
+
+    //get source infrastructure elements by selected element types for selected destnation element
+    $('#media-source-type').change(function() {
+        const selectedOption = $(this).find("option:selected");
+        const mediaType = selectedOption.val();
+        const mediaTypeName = selectedOption.text();
+        const destinationElement = $('#media-destination-element').val();
+        const destinationCode = $('#media-destination-code').val();
+        
+        $.ajax({
+            url: "<?php echo base_url('infrastructure/get-source-element-candidates') ?>",
+            type: "POST",
+            data: { elmType: mediaType, destElmId: destinationElement, destElmCode: destinationCode },
+            success: function(response) {
+                const data = JSON.parse(response);
+                console.log(data);
+                if (data.status === 'success') {
+                    $('#source-element').empty().append('<option value="">--Select Source Element--</option>');
+                    toastr.success(`Loaded source elements for ${mediaTypeName}`);
+                    const options = data.data.map(element =>
+                        `<option value="${element.elmId}">${element.elmType} - ${element.elmCode}</option>`
+                    );
+                    $('#source-element').append(options.join(''));
+                } else {
+                    toastr.error(`Error loading source elements for ${mediaTypeName} - <br/>${data.msg}`);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error loading source infrastructure elements:', xhr);
+            }
+        });
+    });
+    
+
 
     $(document).on('click', '.edit-infra', function () {
         resetAllFields();
