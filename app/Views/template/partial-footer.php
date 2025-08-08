@@ -444,7 +444,7 @@ $('#map-tab').click(function (e) {
     console.log('Map tab clicked');
 
     if (!mapInitialized) {
-        initMap();
+        initConnectMap();
         mapInitialized = true;
         console.log('Map initialized');
     } else {
@@ -505,19 +505,20 @@ function initMap() {
     const markerCluster = L.markerClusterGroup();
 
     // Load pole data
-    $.getJSON("<?php echo base_url('pole/getPoleMapData') ?>", function (poles) {
-        poles.forEach(pole => {
-            const icon = icons[pole.pole_condition] || icons.Default;
-            const condition = pole.pole_condition || 'Default';
+    $.getJSON("<?php echo base_url('infrastructure/getMapData') ?>", function (elements) {
+        elements.forEach(element => {
+            const icon = icons[element.elmCondition] || icons.Default;
+            const condition = element.elmCondition || 'Default';
                 const popupContent = `
                   <div class="popup-${condition.toLowerCase()} leaflet-popup-custom">
-                      <strong>${pole.PoleCode}</strong><br>
-                      <strong>District:</strong> ${pole.districtName}<br>
-                      <strong>Size:</strong> ${pole.SizeLabel}<br>
+                      <strong>${element.elmCode}</strong><br>
+                      <strong>Type:</strong> ${element.elmType}<br>
+                      <strong>District:</strong> ${element.districtName}<br>
+                      <strong>Size:</strong> ${element.SizeLabel}<br>
                       <strong>Status:</strong> ${condition}
                   </div>
              `;
-            const marker = L.marker([parseFloat(pole.latitude), parseFloat(pole.longitude)], {
+            const marker = L.marker([parseFloat(element.latitude), parseFloat(element.longitude)], {
                 icon: icon
             }).bindPopup(popupContent).on('popupopen', function (e) {
                 const popup = e.popup;
@@ -540,6 +541,76 @@ function initMap() {
         setTimeout(() => map.invalidateSize(), 300);
     });
 }
+
+function initConnectMap() {
+  const iconBase = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+  const typeIcons = {
+    Pole: new L.Icon({ iconUrl: iconBase + 'marker-icon-green.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
+    Manhole: new L.Icon({ iconUrl: iconBase + 'marker-icon-blue.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
+    OLTE: new L.Icon({ iconUrl: iconBase + 'marker-icon-orange.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
+    Building: new L.Icon({ iconUrl: iconBase + 'marker-icon-violet.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
+    Default: new L.Icon.Default()
+  };
+
+  const map = L.map('pole-map').setView([0.3476, 32.5825], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18, attribution:'© OpenStreetMap' }).addTo(map);
+
+  const markerCluster = L.markerClusterGroup();
+  const drawn = new Set();
+  const connectionLines = L.layerGroup();
+
+  $.getJSON("<?php echo base_url('infrastructure/getMapData') ?>", elements => {
+    elements.forEach(el => {
+      if (drawn.has(el.elmCode)) return; 
+      drawn.add(el.elmCode);
+
+      const icon = typeIcons[el.elmType]||typeIcons.Default;
+      const marker = L.marker([parseFloat(el.latitude), parseFloat(el.longitude)], { icon })
+        .bindPopup(`
+          <strong>${el.elmCode}</strong><br>
+          <strong>Type:</strong> ${el.elmType}<br>
+          <strong>District:</strong> ${el.districtName}<br>
+          <strong>Size:</strong> ${el.SizeLabel||'N/A'}<br>
+          <strong>Condition:</strong> ${el.elmCondition}<br>
+          <strong>Carriage Cable(s):</strong><br> ${Array.isArray(el.carriageCables) && el.carriageCables.length ? el.carriageCables.join('<br>') : (el.carriageCables || 'N/A')}
+        `);
+      markerCluster.addLayer(marker);
+
+      if (el.srcElementCode) {
+        connectionLines.addLayer(
+          L.polyline([
+            [parseFloat(el.latitude), parseFloat(el.longitude)],
+            [parseFloat(el.srcElementLat), parseFloat(el.srcElementLong)]
+          ], {
+            color: '#555', weight: 2, dashArray: '4,4'
+          })
+          .bindPopup(`Connection from <strong>${el.elmCode}</strong> to <strong>${el.srcElementCode}</strong><br>
+                      Cable: ${el.carryingType || 'N/A'}<br>
+                      Capacity: ${el.carryCapacityLabel || 'N/A'}`)
+        );
+      }
+    });
+    map.addLayer(markerCluster);
+    map.addLayer(connectionLines);
+  });
+
+  // Fix when map tab shown
+  $('a[data-toggle="tab"][href="#map-view"]').on('shown.bs.tab', () => setTimeout(() => map.invalidateSize(), 300));
+
+  // Legend control
+  const legend = L.control({ position:'bottomleft' });
+  legend.onAdd = () => {
+    const div = L.DomUtil.create('div', 'info legend');
+    div.innerHTML = '<b>Element Types</b><br>';
+    Object.entries(typeIcons).forEach(([type, ico]) => {
+      if (type==='Default') return;
+      div.innerHTML += `<img src="${ico.options.iconUrl}" style="width:18px;height:28px;margin-right:4px;">${type}<br>`;
+    });
+    return div;
+  };
+  legend.addTo(map);
+}
+
 
 //Pole Management Controls
   $('.btn-infra').click(function(e){

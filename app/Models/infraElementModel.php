@@ -166,4 +166,102 @@ class InfraElementModel extends Model
             throw new \RuntimeException('Error setting deleted timestamp: ' . $e->getMessage());
         }
     }
+
+    public function getElementsGroupedBy(string $column, int $deleteStatus = 0, array $conditions = [], array $conditionsNot = []){
+        $builder =  $this->select("$column, COUNT(*) as count")
+                    ->join('tbl_infra_element_type', 'tbl_infra_element.elmType = tbl_infra_element_type.infraElementType', 'left')
+                    ->join('tbldistrict', 'tbl_infra_element.district = tbldistrict.districtId', 'left')
+                    ->join('region', 'tbldistrict.region_id = region.RegionId', 'left')
+                    ->join('tb_users user', 'user.user_pf = tbl_infra_element.elmAddedBy', 'left')
+                    ->where('tbl_infra_element.isElmDeleted', $deleteStatus);
+        if (count($conditions) > 0) {
+            foreach ($conditions as $key => $value) {
+                $builder->where($key, $value);
+            }
+        }
+
+        if (count($conditionsNot) > 0) {
+            foreach ($conditionsNot as $key => $value) {
+                $builder->where($key, $value);
+            }
+        }
+
+        return $builder->groupBy($column)
+                        ->orderBy('count', 'DESC')
+                    ->findAll();
+    }
+
+    public function countDistinct($column, string $infraType = '')
+    {
+        $builder = $this->distinct()->select($column)
+                    ->where('isElmDeleted', 0);
+
+        if ($infraType) {
+            $builder->where('elmType', $infraType);
+        }
+
+        return $builder->countAllResults();
+    }
+
+    public function getInfrastructure(int $infraId = 0, array $conditions = [], array $conditionsNot = []){
+        $builder = $this->select([
+                'tbl_infra_element.elmId',
+                'tbl_infra_element.elmCode',
+                'tbl_infra_element.elmCondition',
+                'tbl_infra_element.elmType',
+                'tbl_infra_element.latitude',
+                'tbl_infra_element.longitude',
+                'tbl_infra_element.notes',
+                'tbl_infra_element.elmCreatedAt',
+                'pt.TypeName as poleType',
+                'ps.SizeLabel as poleSize',
+                'd.districtName',
+                'r.RegionName',
+                'concat_ws(" ", user.firstname, user.lastname) as elmAddedBy',
+                'COALESCE( 
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            \'srcElementId\', srcElement.elmId,
+                            \'srcElementCode\', srcElement.elmCode,
+                            \'srcElementLat\', srcElement.latitude,
+                            \'srcElementLong\', srcElement.longitude,
+                            \'srcElementType\', srcElement.elmType,
+                            \'cableInfo\', concat_ws(" - ",ct.carryTypeName,cc.capacityLabel)
+                        )
+                    )
+                ) AS carriageCables',
+                ])
+                    ->join('tbldistrict d', 'd.districtId = tbl_infra_element.district', 'left')
+                    ->join('region r', 'r.RegionId = d.region_id', 'left')
+                ->join('tb_users user', 'user.user_pf = tbl_infra_element.elmAddedBy', 'left')
+                ->join('tbl_pole_types pt', 'pt.TypeId = tbl_infra_element.poleType', 'left')
+                ->join('tbl_polesize ps', 'ps.poleSizeId = tbl_infra_element.poleSize', 'left')
+                ->join('tbl_infra_carrying ic', 'ic.carryElement = tbl_infra_element.elmId and ic.carryIsDeleted = 0', 'left')
+                ->join('tbl_carrying_types ct', 'ct.carryTypeId = ic.carryingType', 'left')
+                ->join('tbl_carry_capacity cc', 'cc.carryCapacityId = ic.carryCapacity', 'left')
+                ->join('tbl_infra_element srcElement', 'srcElement.elmId = ic.carrySource', 'left');
+
+                if($infraId !== 0) {
+                    $builder->where('tbl_infra_element.elmId', $infraId);
+                }
+
+                if(count($conditions) > 0) {
+                    foreach ($conditions as $key => $value) {
+                        $builder->where($key, $value);
+                    }
+                }
+
+                if(count($conditionsNot) > 0) {
+                    foreach ($conditionsNot as $key => $value) {
+                        $builder->where($key, $value);
+                    }
+        }
+
+        return $builder
+                        ->groupBy('tbl_infra_element.elmId')
+                        ->orderBy('tbl_infra_element.elmCreatedAt', 'DESC')
+                        ->findAll();
+    }
+
+
 }

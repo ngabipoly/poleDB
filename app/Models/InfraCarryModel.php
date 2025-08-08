@@ -6,7 +6,7 @@ class InfraCarryModel extends Model
 {
     protected $table = 'tbl_infra_carrying';
     protected $primaryKey = 'carryId';
-    protected $allowedFields = [ 'carryElement', 'carryingType', 'sourceType', 'carrySource', 'carryAddDt', 'carryAddBy', 'carryModifyDt', 'carryModifyBy', 'carryIsDeleted', 'carryDeletedDt', 'carryDeleteBy'];
+    protected $allowedFields = [ 'carryElement', 'carryingType','carryCapacity', 'sourceType', 'carrySource', 'carryAddDt', 'carryAddBy', 'carryModifyDt', 'carryModifyBy', 'carryIsDeleted', 'carryDeletedDt', 'carryDeleteBy'];
     protected $useTimestamps = true;
     protected $createdField = 'carryAddDt';
     protected $updatedField = 'carryModifyDt';
@@ -15,6 +15,7 @@ class InfraCarryModel extends Model
     protected $validationRules = [
         'carryElement' => 'required|integer',
         'carryingType' => 'required|integer',
+        'carryCapacity' => 'required|integer',
         'sourceType' => 'required|in_list[Pole, OLTE, Manhole, Building]',
         'carrySource' => 'required|integer',
     ];
@@ -24,8 +25,12 @@ class InfraCarryModel extends Model
             'integer' => 'Please select a valid element.',
         ],
         'carryingType' => [
-            'required' => 'Carrying Type is required.',
+            'required' => 'Cable Type is required.',
             'integer' => 'Please select a valid carrying type.',
+        ],
+        'carryCapacity' => [
+            'required' => 'Please select a Cable Capacity.',
+            'integer' => 'Please select a valid Cable Capacity.',
         ],
         'sourceType' => [
             'required' => 'Source Type is required.',

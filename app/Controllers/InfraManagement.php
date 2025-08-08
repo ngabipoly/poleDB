@@ -222,7 +222,6 @@ class InfraManagement extends Controller
         
     }
     
-
     
     protected function collectInputData($formType, $elmCode=null)
     {
@@ -580,11 +579,14 @@ class InfraManagement extends Controller
 
     public function mapData()
     {
-        try {
-            $data = $this->infraModel->where('deleted', 0)->findAll();
-            return $this->response->setJSON($data);
+        try{
+            $data = $this->infraModel->getInfrastructure( 0, [], []);  
+            return $this->response->setJSON($data);  
         } catch (\Exception $e) {
+            writeLog("Error fetching map data: " . $e->getMessage());
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
-        }
+        }           
     }
+
+    
 }
