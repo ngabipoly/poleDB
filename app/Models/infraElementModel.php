@@ -169,7 +169,8 @@ class InfraElementModel extends Model
 
     public function getElementsGroupedBy(string $column, int $deleteStatus = 0, array $conditions = [], array $conditionsNot = []){
         $builder =  $this->select("$column, COUNT(*) as count")
-                    ->join('tbl_infra_element_type', 'tbl_infra_element.elmType = tbl_infra_element_type.infraElementType', 'left')
+                    ->join('tbl_pole_types pt', 'tbl_infra_element.poleType = pt.TypeId', 'left')
+                    ->join('tbl_polesize ps', 'tbl_infra_element.poleSize = ps.poleSizeId', 'left')
                     ->join('tbldistrict', 'tbl_infra_element.district = tbldistrict.districtId', 'left')
                     ->join('region', 'tbldistrict.region_id = region.RegionId', 'left')
                     ->join('tb_users user', 'user.user_pf = tbl_infra_element.elmAddedBy', 'left')

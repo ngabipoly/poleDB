@@ -78,7 +78,7 @@
   <?php
     if($page === 'Dashboard'){ ?>
             // Load summary stats
-        $.getJSON("<?php echo base_url('/dashboard/ summaryStats'); ?>", function (data) {
+        $.getJSON("<?php echo base_url('/dashboard/summaryStats'); ?>", function (data) {
             console.log(data);
             $('#totalPoles').text(data.totalPoles);
             $('#totalDistricts').text(data.totalDistricts);
@@ -131,7 +131,7 @@
     });
 
             //chart - Poles by Condition
-            let labels = data.PolesByCondition.map(e => e.pole_condition);
+            let labels = data.PolesByCondition.map(e => e.elmCondition);
             let counts = data.PolesByCondition.map(e => e.count);
             // Condition Chart
               new Chart($('#conditionChart'), {

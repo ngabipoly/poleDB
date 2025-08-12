@@ -1,14 +1,14 @@
 <?php
 
 namespace App\Controllers;
-use App\Models\PoleModel;
+use App\Models\InfraElementModel;
 use App\Models\RegionModel;
 
 class Home extends BaseController
 {
     protected $user;
     protected $session;
-    protected $poleModel;
+    protected $InfraElementModel;
     protected $regionModel;
 
     public function __construct()
@@ -16,7 +16,7 @@ class Home extends BaseController
         // Initialize session
         $this->session = session();
         $this->user = $this->session->get('userData');
-        $this->poleModel = new PoleModel();
+        $this->InfraElementModel = new InfraElementModel();
         $this->regionModel = new RegionModel();
 
         if (!$this->user) {
@@ -52,40 +52,41 @@ class Home extends BaseController
     // Return poles per region for bar chart
     public function polesPerRegion()
     {
-        $data = $this->regionModel->getRegionsWithPolesCount();
+        $data = $this->regionModel->getInfraCount('Pole');
         return $this->response->setJSON($data);
     }
 
     // Return poles per size for pie chart
     public function polesPerSize()
     {
-        $data = $this->poleModel->getPolesGroupedBy('SizeLabel');
+        $data = $this->InfraElementModel->getElementsGroupedBy('SizeLabel', 0, ['elmType'=>'Pole']);
         return $this->response->setJSON($data);
     }
 
     // Return poles by status for doughnut chart
     public function polesByStatus()
     {
-        $data = $this->poleModel->getPolesGroupedBy('pole_condition');
+        $data = $this->InfraElementModel->getElementsGroupedBy('elmCondition', 0, ['elmType'=>'Pole']);
         return $this->response->setJSON($data);
     }
+
 
     // Return dashboard summary stats (info boxes)
     public function summaryStats()
     {
         $data = [
-            'totalPoles' => $this->poleModel->where('pole_condition !=', 'stolen')->countAllResults(), // Exclude soft-deleted poles countAllResults(),
-            'polesPerDistrict' => $this->poleModel->getPolesGroupedBy('districtName'),
-            'PolesPerRegion' => $this->regionModel->getRegionsWithPolesCount(),
-            'PolesByCondition' => $this->poleModel->getPolesGroupedBy('pole_condition'),
-            'damagedPoles' => $this->poleModel->where('pole_condition', 'Damaged')->countAllResults(),
-            'goodPoles' => $this->poleModel->where('pole_condition', 'Good')->countAllResults(),
-            'replantedPoles' => $this->poleModel->where('pole_condition', 're-used')->countAllResults(),
-            'polesPerSize' => $this->poleModel->getPolesGroupedBy('SizeLabel'),
-            'monthlyAddition' => $this->poleModel->where('created_at >=', date('Y-m-01'))->countAllResults()
+            'totalPoles' => (clone $this->InfraElementModel)->where('elmCondition !=', 'stolen')->where('elmType', 'Pole')->countAllResults(), // Exclude soft-deleted poles countAllResults(),
+            'polesPerDistrict' => (clone $this->InfraElementModel)->getElementsGroupedBy('districtName',0,['elmType'=>'Pole']),
+            'PolesPerRegion' => (clone $this->regionModel)->getInfraCount('Pole'),
+            'PolesByCondition' => (clone $this->InfraElementModel)->getElementsGroupedBy('elmCondition', 0, ['elmType'=>'Pole']),
+            'damagedPoles' => (clone $this->InfraElementModel)->where('elmCondition', 'Damaged')->where('elmType','Pole')->countAllResults(),
+            'goodPoles' => (clone $this->InfraElementModel)->where('elmCondition', 'Good')->where('elmType','Pole')->countAllResults(),
+            'replantedPoles' => (clone $this->InfraElementModel)->where('elmCondition', 're-used')->where('elmType','Pole')->countAllResults(),
+            'polesPerSize' => (clone  $this->InfraElementModel)->getElementsGroupedBy('SizeLabel',0,['elmType'=>'Pole']),
+            'monthlyAddition' => (clone $this->InfraElementModel)->where('elmCreatedAt >=', date('Y-m-01'))->countAllResults()
         ];
 
-        $conditionData = $this->regionModel->getPoleConditionsPerRegion();
+        $conditionData = $this->regionModel->getInfraConditionCount('Pole');
 
         // Format for Chart.js
         $regionSet = [];
@@ -98,7 +99,7 @@ class Home extends BaseController
 
         foreach ($conditionData as $row) {
             $region = $row->RegionName ?? 'Unknown';
-            $cond = $row->pole_condition ?? 'Unknown';
+            $cond = $row->elmCondition ?? 'Unknown';
             $count = isset($row->count) ? (int)$row->count : 0;
 
             $regionSet[$region] = true;
