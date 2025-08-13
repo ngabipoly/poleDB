@@ -94,13 +94,10 @@ class RegionModel extends Model
 
     public function getInfraCount(string $elmType = '', string $alias = 'count', ?array $filters = [])
     {
-        $builder = $this->select('region.RegionName, ne.elmType, COUNT(ne.elmId) as ' . $alias)
+        $elmCondition = $elmType ? "and  ne.elmType='$elmType'":'';
+        $builder = $this->select('region.RegionName, COUNT(ne.elmId) as ' . $alias)
                         ->join('tbldistrict d', 'region.RegionId = d.region_id', 'left')
-                        ->join('tbl_infra_element ne', 'd.districtId = ne.district AND ne.isElmDeleted = 0', 'left');
-
-        if (!empty($elmType)) {
-            $builder->where('ne.elmType', $elmType);
-        }
+                        ->join('tbl_infra_element ne', 'd.districtId = ne.district AND ne.isElmDeleted = 0 '.$elmCondition, 'left');
 
         if (!empty($filters)) {
             foreach ($filters as $field => $value) {
@@ -112,8 +109,8 @@ class RegionModel extends Model
             }
         }
 
-        return $builder->groupBy(['region.RegionName', 'ne.elmType'])
-                    ->orderBy('region.RegionName, ne.elmType')
+        return $builder->groupBy(['region.RegionName'])
+                    ->orderBy('region.RegionName')
                     ->findAll();
     }
 

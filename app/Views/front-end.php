@@ -19,7 +19,7 @@
         <h2 class="display-4">Choose an Action</h2>
       </div>
       <div class="tab-loading">
-        <div>
+        <div class="loader">
           <h2 class="display-4">Loading Selection<i class="fa fa-sync fa-spin"></i></h2>
         </div>
       </div>

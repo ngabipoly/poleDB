@@ -83,7 +83,10 @@ class Home extends BaseController
             'goodPoles' => (clone $this->InfraElementModel)->where('elmCondition', 'Good')->where('elmType','Pole')->countAllResults(),
             'replantedPoles' => (clone $this->InfraElementModel)->where('elmCondition', 're-used')->where('elmType','Pole')->countAllResults(),
             'polesPerSize' => (clone  $this->InfraElementModel)->getElementsGroupedBy('SizeLabel',0,['elmType'=>'Pole']),
-            'monthlyAddition' => (clone $this->InfraElementModel)->where('elmCreatedAt >=', date('Y-m-01'))->countAllResults()
+            'monthlyAddition' => (clone $this->InfraElementModel)->where('elmCreatedAt >=', date('Y-m-01'))->countAllResults(),
+            'stolenPoles' => (clone $this->InfraElementModel)->where('elmCondition', 'Stolen')->where('elmType','Pole')->countAllResults(),
+            'totalManholes' => (clone $this->InfraElementModel)->where('elmType','Manhole')->countAllResults(),
+            'manholesByRegion' => (clone $this->regionModel)->getInfraCount('Manhole'),
         ];
 
         $conditionData = $this->regionModel->getInfraConditionCount('Pole');

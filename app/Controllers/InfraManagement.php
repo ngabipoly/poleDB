@@ -300,6 +300,7 @@ class InfraManagement extends Controller
             $data['carrySource'] = $this->request->getPost('source_element');
             $data['carryNotes'] = $this->request->getPost('media_notes');
             $data['carryAddBy'] = $this->user['pfNumber'];
+            $data['carryDistance'] = $this->request->getPost('distance');
             writeLog("Media link data collected: " . json_encode($data));
             return $data;
         }

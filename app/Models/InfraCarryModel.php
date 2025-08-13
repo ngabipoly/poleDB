@@ -6,7 +6,7 @@ class InfraCarryModel extends Model
 {
     protected $table = 'tbl_infra_carrying';
     protected $primaryKey = 'carryId';
-    protected $allowedFields = [ 'carryElement', 'carryingType','carryCapacity', 'sourceType', 'carrySource', 'carryAddDt', 'carryAddBy', 'carryModifyDt', 'carryModifyBy', 'carryIsDeleted', 'carryDeletedDt', 'carryDeleteBy'];
+    protected $allowedFields = [ 'carryElement', 'carryingType','carryCapacity', 'sourceType', 'carrySource', 'carryAddDt','carryDistance', 'carryAddBy', 'carryModifyDt', 'carryModifyBy', 'carryIsDeleted', 'carryDeletedDt', 'carryDeleteBy'];
     protected $useTimestamps = true;
     protected $createdField = 'carryAddDt';
     protected $updatedField = 'carryModifyDt';
@@ -18,6 +18,7 @@ class InfraCarryModel extends Model
         'carryCapacity' => 'required|integer',
         'sourceType' => 'required|in_list[Pole, OLTE, Manhole, Building]',
         'carrySource' => 'required|integer',
+        'carryDistance' => 'required|decimal|greater_than[0]',
     ];
     protected $validationMessages = [
         'carryElement' => [
@@ -39,6 +40,11 @@ class InfraCarryModel extends Model
         'carrySource' => [
             'required' => 'Source Element is required.',
             'integer' => 'Please select a valid source element.',
+        ],
+        'carryDistance' => [
+            'required' => 'Please contact support. Carry Distance is required.',
+            'decimal' => 'Please contact support. Carry Distance must be a decimal number.',
+            'greater_than' => 'Please contact support. Carry Distance must be greater than 0.',
         ],
     ];
     protected $skipValidation = false;
@@ -69,4 +75,6 @@ class InfraCarryModel extends Model
         $data['data']['carryDeletedDt'] = date('Y-m-d H:i:s');
         return $data;
     }
+
+    
 }

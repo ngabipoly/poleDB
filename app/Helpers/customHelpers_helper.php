@@ -50,7 +50,56 @@ helper('filesystem');
 
     }
 
-    
+
+    /**
+     * Calculates the distance between two points on the surface of a sphere (such as the Earth)
+     * using the Haversine formula.
+     *
+     * @param float $point1Latitude The latitude of the first point in decimal degrees.
+     * @param float $point1Longitude The longitude of the first point in decimal degrees.
+     * @param float $point2Latitude The latitude of the second point in decimal degrees.
+     * @param float $point2Longitude The longitude of the second point in decimal degrees.
+     * @return float $distanceKms The distance between the two points in kilometers.
+     */
+    function calculatePointDistance(float $point1Latitude, float $point1Longitude, float $point2Latitude, float $point2Longitude): float {
+        $earthRadius = 6371; // Earth radius in kilometers
+
+        $dLat = deg2rad($point2Latitude - $point1Latitude);
+        $dLon = deg2rad($point2Longitude - $point1Longitude);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($point1Latitude)) * cos(deg2rad($point2Latitude)) *
+             sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        $distanceKms = $earthRadius * $c;
+
+        return $distanceKms; // Distance in kilometers
+    }
+
+    /**
+     * Calculates the total length of a media (e.g. a route) in kilometers, given an array of coordinates.
+     *
+     * @param array $coordinates An array of coordinates, each containing 'lat' and 'lon' keys.
+     * @return float The total length of the media in kilometers.
+     */
+    function calculateMediaLength(array $coordinates): float {
+        $totalMediaLength = 0.0;
+
+        // Loop through consecutive points in the route
+        for ($i = 0; $i < count($coordinates) - 1; $i++) {
+            $point1 = $coordinates[$i];
+            $point2 = $coordinates[$i + 1];
+
+            $totalMediaLength += calculatePointDistance(
+                $point1['lat'], $point1['lon'],
+                $point2['lat'], $point2['lon']
+            );
+        }
+
+        return $totalMediaLength;
+    }
+
     function smsAlert(int $msisdn, string $message, string $sender){
         $curl = curl_init();
         $fields = json_encode([

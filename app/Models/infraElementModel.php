@@ -264,5 +264,43 @@ class InfraElementModel extends Model
                         ->findAll();
     }
 
+    public function getInfraCarryData(array $conditions = [], array $conditionsNot = []): array
+    {
+        $builder = $this->select([
+            'elm.elmId',
+            'elm.elmCode',
+            'elm.elmCondition',
+            'elm.elmType',
+            'elm.latitude',
+            'elm.longitude',
+            'srcElement.latitude as srcElementLat',
+            'srcElement.longitude as srcElementLong',
+            'srcElement.elmType as srcElementType',
+            'concat_ws(" - ", ct.carryTypeName, cc.capacityLabel) as cableInfo',
+            'carryDistance'
+        ])
+            ->from('tbl_infra_element elm')
+            ->join('tbl_infra_carrying', 'tbl_infra_carrying.carryElement = tbl_infra_element.elmId and tbl_infra_carrying.carryIsDeleted = 0 and ', 'left')
+            ->join('tbl_infra_element srcElement', 'srcElement.elmId = tbl_infra_carrying.carrySource', 'left')
+            ->join('tbl_carrying_types ct', 'ct.carryTypeId = tbl_infra_carrying.carryingType', 'left')
+            ->join('tbl_carry_capacity cc', 'cc.carryCapacityId = tbl_infra_carrying.carryCapacity', 'left');
+
+        if (count($conditions) > 0) {
+            foreach ($conditions as $key => $value) {
+                $builder->where($key, $value);
+            }
+        }
+
+        if (count($conditionsNot) > 0) {
+            foreach ($conditionsNot as $key => $value) {
+                $builder->where($key, $value);
+            }
+        }
+
+        return $builder
+            ->groupBy('tbl_infra_carrying.carryId')
+            ->orderBy('tbl_infra_carrying.carryAddDt', 'DESC')
+            ->findAll();
+    }
 
 }

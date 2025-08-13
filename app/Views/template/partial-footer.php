@@ -86,6 +86,8 @@
             $('#goodPoles').text(data.goodPoles);
             $('#replanted').text(data.replantedPoles);
             $('#monthlyAddition').text(data.monthlyAddition);
+            $('#stolenPoles').text(data.stolenPoles);
+            $('#totalManholes').text(data.totalManholes);
 
             // Region Chart
             const regionLabels = data.PolesPerRegion.map(item => item.RegionName);
@@ -174,6 +176,53 @@
                       text: 'Poles by Size'
                     }
                   }
+                }
+            });
+
+            // Manholes By Region Chart
+            const manholeRegionLabels = data.manholesByRegion.map(item => item.RegionName);
+            const manholeRegionData = data.manholesByRegion.map(item => parseInt(item.count));
+            new Chart($('#manholeRegionChart'), {
+                type: 'bar',
+                data: {
+                    labels: manholeRegionLabels,
+                    datasets: [{
+                        label: 'Manholes',
+                        data: manholeRegionData,
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Manholes by Region'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Manholes'
+                            }
+                        }
+                    }
                 }
             });
         });
@@ -737,10 +786,17 @@ function initConnectMap() {
       const mediaTypeId = $(this).data('element-id');
       const mediaTypeName = $(this).data('element-code');
       const mediaDestinationType = $(this).data('infra-type');
+      const currentLongitude = $(this).data('longitude');
+      const currentLatitude = $(this).data('latitude');
 
       $('#destination-media-code').text(`${mediaDestinationType} ${mediaTypeName}`);
       $('#media-destination-element').val(mediaTypeId);
       $('#media-destination-code').val(mediaTypeName);
+      $('#element-longitude').val(currentLongitude);
+      $('#element-latitude').val(currentLatitude);
+      $('#media-link-modal').modal('show');
+
+      console.log(currentLatitude, currentLatitude)
     });
 
     //Get media capacities depending on selected media type
@@ -799,7 +855,7 @@ function initConnectMap() {
                     $('#source-element').empty().append('<option value="">--Select Source Element--</option>');
                     toastr.success(`Loaded source elements for ${mediaTypeName}`);
                     const options = data.data.map(element =>
-                        `<option value="${element.elmId}">${element.elmType} - ${element.elmCode}</option>`
+                        `<option value="${element.elmId}" data-src-latitude="${element.latitude}" data-src-longitude="${element.longitude}">${element.elmType} - ${element.elmCode}</option>`
                     );
                     $('#source-element').append(options.join(''));
                 } else {
@@ -811,8 +867,24 @@ function initConnectMap() {
             }
         });
     });
-    
 
+    //extract the source element co-ordinates 
+    // and calculate distace of current element from the source being linked.
+
+    $('#source-element').change(function() {
+      const selectedOption = $(this).find("option:selected");
+      const sourceLongitude = selectedOption.data('src-longitude');
+      const sourceLatitude = selectedOption.data('src-latitude');
+      $('#src-element-longitude').val(sourceLongitude);
+      $('#src-element-latitude').val(sourceLatitude);
+
+      // Calculate distance from current element
+      const currentLongitude = $('#element-longitude').val();
+      const currentLatitude = $('#element-latitude').val();
+      const distance = calculateDistance(currentLatitude, currentLongitude, sourceLatitude, sourceLongitude);
+      $('#distance').val(distance.toFixed(2)); // Round to 2 decimal places
+      $('#media-distance-label').text(`Distance: ${distance.toFixed(2)} meters`);
+    });
 
     $(document).on('click', '.edit-infra', function () {
         resetAllFields();
@@ -1125,6 +1197,32 @@ function print_elm(elem){
   $(elem).printThis();
 }
   });
+
+      /**
+       * Calculate the distance between two latitude/longitude points using the Haversine formula.
+       * @param {number|string} lat1 - Latitude of the first point.
+       * @param {number|string} lon1 - Longitude of the first point.
+       * @param {number|string} lat2 - Latitude of the second point.
+       * @param {number|string} lon2 - Longitude of the second point.
+       * @returns {number} Distance in meters.
+       */
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const toRadians = deg => Number(deg) * Math.PI / 180;
+        const EARTH_RADIUS_METERS = 6371000; // Earth's radius in meters
+
+        const latitude1Rad = toRadians(lat1);
+        const latitude2Rad = toRadians(lat2);
+        const deltaLatitude = toRadians(lat2 - lat1);
+        const deltaLongitude = toRadians(lon2 - lon1);
+
+        const a = Math.sin(deltaLatitude / 2) ** 2 +
+          Math.cos(latitude1Rad) * Math.cos(latitude2Rad) *
+          Math.sin(deltaLongitude / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return Math.round(EARTH_RADIUS_METERS * c);
+      }
+
 </script>
 </body>
 </html>

@@ -451,7 +451,7 @@
 <div class="modal fade" id="media-link-modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary">
                 <h5 class="modal-title"><i class="fas fa-link"></i> Link Media to <span id="destination-media-code"></span> </h5>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
@@ -460,41 +460,59 @@
                 <input type="hidden" name="media-destination-element" id="media-destination-element" value="">
                 <input type="hidden" name="media-destination-code" id="media-destination-code" value="">
                 <input type="hidden" name="carryId" id="carry-id" value="0">
+                <input type="hidden" name="element-longitude" id="element-longitude" value="0">
+                <input type="hidden" name="element-latitude" id="element-latitude" value="0">
+                <input type="hidden" name="src-element-longitude" id="src-element-longitude" value="0">
+                <input type="hidden" name="src-element-latitude" id="src-element-latitude" value="0">
                 <input type="hidden" name="formType" value="linkMedia" class="">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="media-type">Cable Type</label>
-                        <select class="form-control" id="media-type" name="media_type">
-                            <option value="">--Select Cable Type--</option>
-                            <?php foreach ($media_types as $media_type): ?>
-                                <option value="<?php echo esc($media_type->carryTypeId); ?>"><?php echo esc($media_type->carryTypeName); ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div class="row mb-0">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="media-type" class="col-form-label-sm pb-0">Cable Type</label>
+                                <select class="form-control form-control-sm" id="media-type" name="media_type">
+                                    <option value="">--Select Cable Type--</option>
+                                    <?php foreach ($media_types as $media_type): ?>
+                                        <option value="<?php echo esc($media_type->carryTypeId); ?>"><?php echo esc($media_type->carryTypeName); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>                        
+                        </div>  
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="media-capacity" class="col-form-label-sm pb-0">Cable Capacity</label>
+                                <select class="form-control form-control-sm" id="media-capacity" name="media_capacity">
+                                    
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="media-capacity">Cable Capacity</label>
-                        <select class="form-control" id="media-capacity" name="media_capacity">
-                            
-                        </select>
+                    <div class="row mt-0 mb-0">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="media-source-type" class="col-form-label-sm pb-0">Source Type</label>
+                                <select class="form-control form-control-sm" id="media-source-type" name="media_source_type">
+                                    <option value="">--Select Source Element Type--</option>
+                                    <option value="Pole">Pole</option>
+                                    <option value="Manhole">Manhole</option>
+                                </select>
+                            </div>                            
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="source-element" class="col-form-label-sm pb-0">Source Element</label>
+                                <select class="form-control form-control-sm" id="source-element" name="source_element">
+                                    <option value="">--Select Origin Element--</option>
+                                </select>
+                            </div>                            
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="media-source-type">Source Type</label>
-                        <select class="form-control" id="media-source-type" name="media_source_type">
-                            <option value="">--Select Source Element Type--</option>
-                            <option value="Pole">Pole</option>
-                            <option value="Manhole">Manhole</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="source-element">Source Element</label>
-                        <select class="form-control" id="source-element" name="source_element">
-                            <option value="">--Select Origin Element--</option>
-                        </select>
-                    </div>
+                    <small id="media-distance-label" class="form-text text-muted"></small>
+                    <input type="hidden" class="form-control form-control-sm" id="distance" name="distance" value="0" readonly>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Link</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-sm btn-success rounded-6">Create Link</button>
                 </div>
             </form>
         </div>
