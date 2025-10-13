@@ -99,7 +99,7 @@ class UserRoleMgr extends BaseController
 
             return jEncodeResponse(
                 [],
-                "User <strong>{$lastName} , {$firstName} </strong>" . ($userIdExists ? 'updated' : 'saved') . " successfully".($generatedPassword ? "<br/> password: <b>{$generatedPassword}</b><br/> <em>Advise User to change Immediately.</em>" : ''),
+                "User <strong>{$lastName} , {$firstName} </strong>" . ($userIdExists ? 'updated' : 'saved') . " successfully".($generatedPassword ? "<br/><em>Advise User to Check Email for One-time Password.</em>" : ''),
                 'success',
                 200,
                 true,

@@ -200,26 +200,31 @@ public function deleteElement()
             );
         }
 
-        // ✅ Mark deletedBy before actual delete
-        if (!$this->infraModel->update($id, ['deletedBy' => $userPf])) {
+        //Mark deletedBy before actual delete
+        writeLog("Marking $elementType with ID: $id as deleted by user $userPf");
+        if (!$this->infraModel->save( [
+                'elmId' => $id,
+                'isElmDeleted' => 1,
+                'elmDeletedBy' => $userPf])
+                ) {
             throw new \Exception("Failed to mark $elementType as deleted by user $userPf.");
         }
 
-        // ✅ Perform actual delete
+        writeLog("Deleting $elementType with ID: $id");
+        //Perform actual delete
         if (!$this->infraModel->delete($id)) {
             $errors = implode('<br>', $this->infraModel->errors());
             throw new \Exception("Failed to delete $elementType.<br>$errors");
         }
 
         writeLog("$elementType with ID: $id successfully deleted by $userPf");
-        return jEncodeResponse([], "$elementType deleted successfully", 'success', 200, true);
+        return jEncodeResponse([], "$elementType deleted successfully", 'success', 200, true, 'infrastructure');
 
     } catch (\Exception $e) {
         writeLog("Error deleting $elementType: " . $e->getMessage() . " - Line: " . $e->getLine());
         return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
     }
 }
-
 
     public function viewElementDetails(){
         try {
