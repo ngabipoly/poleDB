@@ -1,4 +1,4 @@
-<?php echo view('template/partial-header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header'); ?>
  <div class="content-wrapper">
     <!-- Page header and breadcrumb -->
     <section class="content-header">
@@ -164,4 +164,4 @@
     </div>
 
 
-<?php echo view('template/partial-footer'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>

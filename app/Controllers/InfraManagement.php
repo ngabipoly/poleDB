@@ -10,6 +10,7 @@ use App\Models\CarryTypeModel;
 use App\Models\CarryCapacityModel;
 use App\Models\PoleCarryingModel;
 use App\Models\InfraCarryModel;
+use CodeIgniter\Log\Logger;
 
 class InfraManagement extends Controller
 {
@@ -114,7 +115,7 @@ class InfraManagement extends Controller
             }
 
             writeLog("$elementType $elmCode added successfully");
-            return jEncodeResponse($data, "$elementType $elmCode added successfully", 'success', 200, true);
+            return jEncodeResponse($data, "$elementType $elmCode added successfully", 'success', 200, true,'infrastructure');
         } catch (\Exception $e) {
             writeLog("Error adding new $elementType: " . $e->getMessage());
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
@@ -124,39 +125,115 @@ class InfraManagement extends Controller
     public function updateElement(string $elementType, $id)
     {
         try {
+            writeLog("Updating $elementType, ID: $id");
             $element = $this->infraModel->find($id);
-            if (!$element) throw new \Exception("$elementType not found.");
+            if (!$element){
+                    writeLog("$elementType - $id not found.");
+                    throw new \Exception("$elementType - $id not found.");
+                }
 
             $elmCode = $element['elmCode'];
-            $data = $this->collectInputData($elmCode);
+            writeLog("Updating collection $elementType with code: $elmCode");
+            $data = $this->collectInputData('elementEntries');
+
+            writeLog("Updating $elementType: " . json_encode($data));
 
             if (!$this->infraModel->update($id, $data)) {
                 throw new \Exception(implode('<br>', $this->infraModel->errors()));
             }
 
-            return jEncodeResponse($data, "$elementType $elmCode updated successfully", 'success', 200, true);
+            return jEncodeResponse($data, "$elementType $elmCode updated successfully", 'success', 200, true,'infrastructure');
         } catch (\Exception $e) {
+                writeLog("Error updating $elementType - $id: " . implode('<br>', $this->infraModel->errors()));
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
     }
 
-    public function deleteElement()
-    {
+public function deleteElement()
+{
+    try {
+        $id = $this->request->getPost('delete_element_id');
+        $elementType = $this->request->getPost('delete_element_type');
+        $elementTag = $this->request->getPost('delete_element_code');
+        $userPf = $this->user['pfNumber'];
+
+        writeLog("Attempt by $userPf to delete $elementType with ID: $id, Tag: $elementTag");
+
+        // ✅ Basic validation
+        if (empty($id) || !is_numeric($id)) {
+            throw new \Exception("Invalid or missing element ID.");
+        }
+
+        // ✅ Fetch the element record
+        $element = $this->infraModel->find($id);
+        if (!$element) {
+            throw new \Exception("$elementType not found.");
+        }
+
+        $elementCode = $element['elmCode'] ?? 'Unknown';
+        writeLog("$userPf is deleting $elementType with ID: $id and Code: $elementCode");
+        writeLog("Element details: " . json_encode($element));
+
+        // ✅ Check dependencies (linked elements)
+        $dependencyResponse = $this->getInfraElements($element['elmId']);
+        writeLog("Dependency Check Raw Response: " . $dependencyResponse);
+
+        $dependencyData = json_decode($dependencyResponse);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception("Failed to decode dependency response.");
+        }
+
+        // ✅ Defensive checks for missing properties
+        $upstream = $dependencyData->data->upstreamElements ?? [];
+        $downstream = $dependencyData->data->downstreamElements ?? [];
+
+        $numUpstream = is_array($upstream) ? count($upstream) : 0;
+        $numDownstream = is_array($downstream) ? count($downstream) : 0;
+
+        writeLog("Dependency Check Found: $numUpstream upstream and $numDownstream downstream elements.");
+
+        if ($numUpstream > 0 || $numDownstream > 0) {
+            writeLog("$elementType with ID: $id has dependencies — cannot delete.");
+            throw new \Exception(
+                "Cannot delete $elementType. <br>" .
+                "Delink $elementType {$element['elmCode']} from $numUpstream upstream and $numDownstream downstream dependencies."
+            );
+        }
+
+        // ✅ Mark deletedBy before actual delete
+        if (!$this->infraModel->update($id, ['deletedBy' => $userPf])) {
+            throw new \Exception("Failed to mark $elementType as deleted by user $userPf.");
+        }
+
+        // ✅ Perform actual delete
+        if (!$this->infraModel->delete($id)) {
+            $errors = implode('<br>', $this->infraModel->errors());
+            throw new \Exception("Failed to delete $elementType.<br>$errors");
+        }
+
+        writeLog("$elementType with ID: $id successfully deleted by $userPf");
+        return jEncodeResponse([], "$elementType deleted successfully", 'success', 200, true);
+
+    } catch (\Exception $e) {
+        writeLog("Error deleting $elementType: " . $e->getMessage() . " - Line: " . $e->getLine());
+        return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+    }
+}
+
+
+    public function viewElementDetails(){
         try {
-            $id = $this->request->getPost('del_elm_id');
-            $elementType = $this->request->getPost('del_elm_type');
-            $element = $this->infraModel->find($id);
-
-            if (!$element) throw new \Exception("$elementType not found.");
-            if (!$this->infraModel->update($id, ['deletedBy' => $this->user['user_pf']])) {
-                throw new \Exception("Failed to delete $elementType.");
+            $id = $this->request->getUri()->getSegment(3);
+            if (empty($id) || !is_numeric($id)) {
+                throw new \Exception("Invalid or missing element ID in URI.");
             }
+            $data['element'] = $this->infraModel->getInfraElementById($id);
+            if (!$data['element']) throw new \Exception("Element not found.");
 
-            if (!$this->infraModel->delete($id)) {
-                throw new \Exception(implode('<br>', $this->infraModel->errors()));
-            }
-
-            return jEncodeResponse([], "$elementType deleted successfully", 'success', 200, true);
+            $data['upstreamElements'] = $this->infraModel->getLinkageData(['carrySource' => $id]);
+            $data['downstreamElements'] = $this->infraModel->getLinkageData(['carryElement' => $id], 'downstream');
+            $data['page'] = 'Element Details - '.$data['element']['elmCode'];
+            return view('infra-details', $data);
         } catch (\Exception $e) {
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
@@ -258,7 +335,6 @@ class InfraManagement extends Controller
             writeLog("User: " . json_encode($this->user));
 
             $data = [
-                'elmCode'     => $elmCode,
                 'elmType'     => $type,
                 'elmCondition'=> $this->request->getPost('elmCondition'),
                 'district'  => $this->request->getPost('districtId'),
@@ -268,15 +344,24 @@ class InfraManagement extends Controller
                 'elmAddedBy'   => $this->user['pfNumber'],
             ];
 
+            if ($elmCode) {
+                $data['elmCode'] = $elmCode;
+            }
+
             // Add conditional fields
             if ($type === 'Pole') {
-                $data['poleTypeId'] = $this->request->getPost('poleTypeId');
-                $data['poleSizeId'] = $this->request->getPost('poleSizeId');
+                $data['poleType'] = $this->request->getPost('poleTypeId');
+                $data['poleSize'] = $this->request->getPost('poleSizeId');
             } elseif ($type === 'Manhole') {
                 $data['manholeWidth']  = $this->request->getPost('manholeWidth');
                 $data['manholeDepth']  = $this->request->getPost('manholeDepth');
                 $data['manholeLength'] = $this->request->getPost('manholeLength');
                 $data['manholeDiameter'] = $this->request->getPost('manholeDiameter');
+                $data['manholeLocation'] = $this->request->getPost('manholeLocation');
+                $data['coverType'] = $this->request->getPost('coverType');
+                $data['operatingStatus'] = $this->request->getPost('operatingStatus');
+                $data['constructionMaterial'] = $this->request->getPost('constructionMaterial');
+                $data['accessRestriction'] = $this->request->getPost('accessRestriction');
             } elseif ($type === 'Building') {
                 $data['buildingName']     = $this->request->getPost('buildingName');
                 $data['buildingStreet']   = $this->request->getPost('buildingStreet');
@@ -414,10 +499,10 @@ class InfraManagement extends Controller
 
     
     public function carryingCables(){
-        $elmentId = $this->request->getPost('poleId');
-        $element = $this->infraModel->find($elmentId);
+        $elementId = $this->request->getPost('poleId');
+        $element = $this->infraModel->find($elementId);
         if (!$element) {
-            writeLog("Pole not found with ID: $element");
+            writeLog("Pole not found with ID: $elementId");
             throw new \Exception('Pole not found');
         }
         try{
@@ -425,10 +510,10 @@ class InfraManagement extends Controller
             if (!$this->infraModel->update($element, $data)) {
                 throw new \Exception(implode('<br>', $this->infraModel->errors()));
             }
-            writeLog("Cables the pole $element is carrying updated successfully");
+            writeLog("Cables the pole $elementId is carrying updated successfully");
             return jEncodeResponse(
                 [],
-                "Cables the pole $element is carrying updated successfully",
+                "Cables the pole $elementId is carrying updated successfully",
                 'success',
                 200,
                 true,
@@ -441,7 +526,7 @@ class InfraManagement extends Controller
     }  
 
     public function linkMediaToElement()
-    {
+    { 
         try {
             $formType = $this->request->getPost('formType');
             $data = $this->collectInputData($formType);
@@ -470,6 +555,7 @@ class InfraManagement extends Controller
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
     }
+
     /**
      * Get capacity information for the provided carry/media type.
      * This method retrieves the cable capacity based on the carry type.
@@ -589,5 +675,32 @@ class InfraManagement extends Controller
         }           
     }
 
-    
+    /**
+     * Get infrastructure elements dependant on selected element.
+     * This method retrieves elements that are either upstream or downstream
+     * of the specified element based on the element code.
+     */
+    public function getInfraElements($elementCode){
+        try {
+            writeLog("Fetching infrastructure elements linked to element code: $elementCode");
+            if (empty($elementCode)) {
+                writeLog("Element code is required.");
+                throw new \Exception("Element code is required.");
+            }
+
+            $upstreamElements = $this->infraModel->getLinkageData(['carrySource' => $elementCode]);
+            $downstreamElements = $this->infraModel->getLinkageData(['carryElement' => $elementCode], 'downstream');
+
+            $response = [
+                'upstreamElements' => $upstreamElements,
+                'downstreamElements' => $downstreamElements
+            ];
+
+            writeLog("Linked elements retrieved successfully for element code: $elementCode");
+            return jEncodeResponse($response, 'Linked elements retrieved successfully', 'success', 200, true);
+        } catch (\Exception $e) {
+            writeLog("Error retrieving linked elements: " . $e->getMessage());
+            return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+        }
+    }    
 }

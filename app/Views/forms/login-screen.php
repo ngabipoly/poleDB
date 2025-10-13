@@ -26,7 +26,7 @@
     <div class="card-body">
       <p class="login-box-msg">Sign in to start your session</p>
 
-      <form action="/public/pole-position/login" class="db-submit" method="post" data-initmsg="Attempting Login">
+      <form action="<?php echo base_url();?>/pole-position/login" class="db-submit" method="post" data-initmsg="Attempting Login">
         <?php echo csrf_field();?>
         <div class="input-group mb-3">
           <input type="text" name="pf-number" class="form-control" placeholder="PF Number" required oninvalid="this.setCustomValidity('Please enter your PF Number')" oninput="setCustomValidity('')">

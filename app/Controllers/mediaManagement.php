@@ -30,7 +30,7 @@
                 'page' => 'Media capacity Management',
                 'user' => $this->user,
                 'carryCapacities' => $this->carryCapacityModel->
-                            join('tbl_carrying_Types ct', 'carryType = ct.carryTypeId', 'left')->
+                            join('tbl_carrying_types ct', 'carryType = ct.carryTypeId', 'left')->
                             findAll(),
                 'carryTypes' => $this->carryTypeModel->findAll()
             ];

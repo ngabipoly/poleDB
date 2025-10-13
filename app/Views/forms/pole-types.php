@@ -1,4 +1,4 @@
-<?php echo view('template/partial-header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header'); ?>
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -127,4 +127,4 @@
     </div>
 </div>
 
-<?php echo view('template/partial-footer'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>

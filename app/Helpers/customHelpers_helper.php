@@ -84,51 +84,72 @@ helper('filesystem');
      * @return float The total length of the media in kilometers.
      */
     function calculateMediaLength(array $coordinates): float {
-        $totalMediaLength = 0.0;
+        try {
+            if (!is_array($coordinates) || empty($coordinates)) {
+                throw new Exception("Invalid coordinates array.");
+            }
+            $totalMediaLength = 0.0;
 
-        // Loop through consecutive points in the route
-        for ($i = 0; $i < count($coordinates) - 1; $i++) {
-            $point1 = $coordinates[$i];
-            $point2 = $coordinates[$i + 1];
+            // Loop through consecutive points in the route
+            for ($i = 0; $i < count($coordinates) - 1; $i++) {
+                $point1 = $coordinates[$i];
+                $point2 = $coordinates[$i + 1];
 
-            $totalMediaLength += calculatePointDistance(
-                $point1['lat'], $point1['lon'],
-                $point2['lat'], $point2['lon']
-            );
+                $totalMediaLength += calculatePointDistance(
+                    $point1['lat'], $point1['lon'],
+                    $point2['lat'], $point2['lon']
+                );
+            }
+            return $totalMediaLength;
+        } catch (Exception $e) {
+            writeLog($e->getMessage());
+            return 0.0;
         }
-
-        return $totalMediaLength;
     }
 
     function smsAlert(int $msisdn, string $message, string $sender){
-        $curl = curl_init();
-        $fields = json_encode([
-            "sender"=>$sender,
-            "recipient"=>$msisdn,
-            "message"=>$message
-        ]);
+        try{
+            $curl = curl_init();
+            $fields = json_encode([
+                "sender"=>$sender,
+                "recipient"=>$msisdn,
+                "message"=>$message
+            ]);
 
-        curl_setopt_array($curl, array(
-          CURLOPT_URL => SMS_API_URL,
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_ENCODING => '',
-          CURLOPT_MAXREDIRS => 10,
-          CURLOPT_TIMEOUT => 0,
-          CURLOPT_FOLLOWLOCATION => true,
-          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-          CURLOPT_CUSTOMREQUEST => 'POST',
-          CURLOPT_POSTFIELDS =>$fields,
-          CURLOPT_HTTPHEADER => array(
-            'Content-Type: application/json',
-            'Authorization: Basic VmFzQXBwOlZhc0RldkAxMjM0'
-          ),
-        ));
-        
-        $response = curl_exec($curl);
-        writeLog("Sending SMS {$message} to {$msisdn} from {$sender} - {$response}");
-        
-        curl_close($curl);
-        return $response;        
+            curl_setopt_array($curl, array(
+            CURLOPT_URL => SMS_API_URL,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS =>$fields,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Basic VmFzQXBwOlZhc0RldkAxMjM0'
+            ),
+            ));
+            
+            $response = curl_exec($curl);
+            if(curl_errno($curl)){
+                $error = curl_error($curl);
+                throw new Exception("SMS sending Failed:{$error}");
+            }
+            writeLog("Sending SMS {$message} to {$msisdn} from {$sender} - {$response}");
+            
+            curl_close($curl);
+            return $response;        
+        }catch(Exception $e){
+            writeLog("SMS sending Failed:{$e->getMessage()}");
+            log_message("error", "SMS sending Failed:{$e->getMessage()}");
+        }
+        finally{
+            if($curl){
+                curl_close($curl);
+            }
+        }
     }
 
 
@@ -168,34 +189,47 @@ helper('filesystem');
 
 
     function sendMail(string $from, string $to, string $subject,string $message,string $cc=null){
-        $curl = curl_init();
-        $fields = json_encode([
-            "From"=> $from,
-            "To"=> $to,
-            "Sub"=> $subject,
-            "Msg"=> $message
-        ]);
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => EMAIL_API_URL,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS =>$fields,
-            CURLOPT_HTTPHEADER => array(
-              'Content-Type: application/json'
-            ),
-          ));
-          
-          writeLog("Sending Email  to {$to} about {$subject}");    
-          $response = curl_exec($curl);        
-          curl_close($curl);
-          writeLog("Mail sending Complete Response:{$response}");
-          return $response;         
+        try{
+            $curl = curl_init();
+            $fields = json_encode([
+                "From"=> $from,
+                "To"=> $to,
+                "Sub"=> $subject,
+                "Msg"=> $message
+            ]);
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => EMAIL_API_URL,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS =>$fields,
+                CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+                ),
+            ));
 
+            //log curl request before sending
+            log_message("info", "Sending Email Request: " . json_encode($curl));
+
+            writeLog("Sending Email  to {$to} about {$subject}");    
+            $response = curl_exec($curl);    
+            if(curl_errno($curl)){
+                $error = curl_error($curl);
+                throw new Exception("Mail sending Failed:{$error}");
+            }
+            curl_close($curl);
+            writeLog("Mail sending Complete Response:{$response}");
+            log_message("error", "Mail sending Complete Response:{$response}");
+            return $response;
+        }catch(Exception $e){
+            writeLog("Mail sending Failed:{$e->getMessage()}");
+            log_message("error", "Mail sending Failed:{$e->getMessage()}");
+        }
+            
     }
 
     //function to encode responses to JSON format

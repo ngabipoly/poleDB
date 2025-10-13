@@ -99,7 +99,7 @@ class UserRoleMgr extends BaseController
 
             return jEncodeResponse(
                 [],
-                "User <strong>{$lastName} , {$firstName} </strong>" . ($userIdExists ? 'updated' : 'saved') . " successfully",
+                "User <strong>{$lastName} , {$firstName} </strong>" . ($userIdExists ? 'updated' : 'saved') . " successfully".($generatedPassword ? "<br/> password: <b>{$generatedPassword}</b><br/> <em>Advise User to change Immediately.</em>" : ''),
                 'success',
                 200,
                 true,
@@ -149,7 +149,7 @@ class UserRoleMgr extends BaseController
 
             return jEncodeResponse(
                 [], 
-                "Password for {$names} has been Reset!", 
+                "Password for {$names} has been Reset! <br/> One-time Password:<b>{$password}</b> <br/><em> Please change this as soon as you log on.</em>", 
                 'success', 200
             );
         } catch (\Throwable $e) {
@@ -213,7 +213,7 @@ class UserRoleMgr extends BaseController
             }
 
             $msg = 'Password Successfully changed!';
-            $redir = base_url('/');
+            $redir = base_url('pole-position/logout');
 
             return jEncodeResponse([], $msg, 'success', 200, true, $redir);
 

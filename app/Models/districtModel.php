@@ -8,11 +8,11 @@ class DistrictModel extends Model
 {
     protected $table = 'tbldistrict';
     protected $primaryKey = 'districtId';
-    protected $allowedFields = ['districtName','code', 'region_id', 'created_at', 'updated_at'];
+    protected $allowedFields = ['districtName','code', 'region_id', 'disCreatedAt', 'disUpdatedAt', 'disDeletedBy','disCreatedBy','disUpdatedBy'];
     protected $useTimestamps = true;
 
-    protected $createdField = 'created_at';
-    protected $updatedField = 'updated_at';
+    protected $createdField = 'disCreatedAt';
+    protected $updatedField = 'disUpdatedAt';
     protected $useSoftDeletes = false;
 
     protected $validationRules = [

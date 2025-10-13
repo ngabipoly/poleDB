@@ -1,4 +1,4 @@
-<?php echo view('template\header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'header'); ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper iframe-mode" data-widget="iframe" data-loading-screen="750">
     <div class="nav navbar navbar-expand navbar-white navbar-light border-bottom p-0">
@@ -26,4 +26,4 @@
     </div>
   </div>
   <!-- /.content-wrapper -->
-  <?php echo view('template\footer'); ?>
+  <?php echo view('template'.DIRECTORY_SEPARATOR.'footer'); ?>

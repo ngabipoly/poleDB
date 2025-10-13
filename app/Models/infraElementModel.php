@@ -25,13 +25,18 @@ class InfraElementModel extends Model
         'isElmDeleted',
         'elmDeletedDate',
         'elmDeletedBy',
-        'poleTypeId',
-        'poleSizeId',
+        'poleType',
+        'poleSize',
         'olteTypeId',
         'manholeWidth',
         'manholeDepth',
         'manholeLength',
         'manholeDiameter',
+        'manholeLocation',
+        'accessRestriction',
+        'coverType',
+        'operatingStatus',
+        'constructionMaterial',
         'buildingName',
         'buildingStreet',
         'landlordName',
@@ -51,8 +56,8 @@ class InfraElementModel extends Model
         'latitude' => 'required|decimal',    
         'longitude' => 'required|decimal',
         'district' => 'required|integer',
-        'poleTypeId' => 'permit_empty|integer',
-        'poleSizeId' => 'permit_empty|integer',
+        'poleType' => 'permit_empty|integer',
+        'poleSize' => 'permit_empty|integer',
         'olteTypeId' => 'permit_empty|integer',
         'manholeWidth' => 'permit_empty|decimal',
         'manholeDepth' => 'permit_empty|decimal',
@@ -302,5 +307,72 @@ class InfraElementModel extends Model
             ->orderBy('tbl_infra_carrying.carryAddDt', 'DESC')
             ->findAll();
     }
+
+    public function getLinkageData(array $conditions, string $direction ='upstream'): array
+    {
+        $builder  = $this->db->table('tbl_infra_element');
+        $streamJoin = $direction === 'upstream' ? '`tic`.`carryElement`' : '`tic`.`carrySource`';
+        $this->select([
+                'elmId',
+                'elmCode',
+                'elmCondition',
+                'elmType',
+                'latitude',
+                'longitude',
+                'tic.carryId',
+                'ct.carryTypeName',
+                'cc.capacityLabel',
+                'tic.carryDistance as distance',
+                'd.districtName as district',
+                'r.RegionName as region'
+            ])
+            ->join('tbl_infra_carrying tic', "$streamJoin = elmId AND tic.carryIsDeleted = 0")
+            ->join('tbl_carrying_types ct', 'ct.carryTypeId = tic.carryingType')
+            ->join('tbl_carry_capacity cc', 'cc.carryCapacityId = tic.carryCapacity')
+            ->join('tbldistrict d', 'd.districtId = district')
+            ->join('region r', 'r.RegionId = d.region_id');
+
+        foreach ($conditions as $key => $value) {
+            $this->where($key, $value);
+        }      
+        // Log final query
+        //log_message('debug', (string) $this->getCompiledSelect());
+
+        return $this->findAll();
+    }
+
+    public function getInfraElementById(int $id): array
+    {
+        return $this->select(['elmCode',
+            'elmCondition',
+            'elmType',
+            'TypeName poleType',
+            'SizeLabel poleSize',
+            'latitude',
+            'longitude',
+            'manholeDepth',
+            'manholeDiameter',
+            'manholeLength',
+            'manholeWidth',
+            'constructionMaterial',
+            'accessRestriction',
+            'coverType',
+            'manholeLocation',
+            'operatingStatus',
+            'd.districtName as district',
+            'r.RegionName as region',
+            'concat_ws(" ", user.lastname, user.firstname) as createdBy',
+            'elmCreatedAt as createdAt'
+        ]
+        )
+            ->join('tbldistrict d', 'd.districtId = district', 'left')
+            ->join('region r', 'r.RegionId = d.region_id', 'left')
+            ->join('tbl_pole_types pt', 'pt.typeId = poleType', 'left')
+            ->join('tbl_polesize ps', 'ps.poleSizeId = poleSize', 'left')
+            ->join('tb_users user', 'user.user_pf = elmAddedBy', 'left')
+            ->where('elmId', $id)
+            ->first();
+    }
+
 
 }

@@ -42,6 +42,7 @@ $routes->post('infrastructure/delete', 'InfraManagement::deleteElement');
 $routes->post('infrastructure/get-cable-capacity', 'InfraManagement::getCableCapacityByCarryType');
 $routes->post('infrastructure/get-source-element-candidates', 'InfraManagement::getSourceElementCandidates');
 $routes->post('infrastructre/linkMedia', 'InfraManagement::linkMediaToElement');
+$routes->get('infrastructure/element-details/(:num)','InfraManagement::viewElementDetails');
 
 //media management
 $routes->get('infrastructure/media-types', 'MediaManagement::listMediaTypes');
@@ -61,3 +62,7 @@ $routes->get('administration/usr-roles', 'UserRoleMgr::roles');
 $routes->get('administration/fetch-rights', 'UserRoleMgr::loadRightsMenus');
 $routes->post('administration/role-save', 'UserRoleMgr::saveRole');
 $routes->post('administration/save-role-rights', 'UserRoleMgr::saveRights');
+
+//user self Password change
+$routes->get('user/reset-password', 'AppAuth::changeMyPassword');
+$routes->post('user/save-new-password', 'AppAuth::addMyNewPassword');

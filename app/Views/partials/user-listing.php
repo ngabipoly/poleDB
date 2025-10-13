@@ -1,4 +1,4 @@
-<?php echo view('template\partial-header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header'); ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
 <?php 
@@ -61,8 +61,6 @@ $activity = ['1'=>'Inactive', '2'=>'Active','3'=>'Deactivated']
         </div>
     </section>
 
-    <?php echo view('template\partial-footer'); ?>
-    
     <div class="modal fade" id="user-modal">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
@@ -141,3 +139,6 @@ $activity = ['1'=>'Inactive', '2'=>'Active','3'=>'Deactivated']
         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
+
+
+    <?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>

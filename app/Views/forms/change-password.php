@@ -1,4 +1,4 @@
-<?php echo view('template\partial-header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header'); ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
 <?php 
@@ -52,4 +52,4 @@
     </section>
 </div>
 
-    <?php echo view('template\partial-footer'); ?>
+    <?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>

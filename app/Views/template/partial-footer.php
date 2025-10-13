@@ -48,6 +48,7 @@
             navigator.geolocation.getCurrentPosition(function(position) {
               $('#latitude').val(position.coords.latitude.toFixed(6));
               $('#longitude').val(position.coords.longitude.toFixed(6));
+              $('#infra-coordinates').text('Coordinates: Lat: ' + position.coords.latitude.toFixed(6) + ', Lng: ' + position.coords.longitude.toFixed(6));
             }, function(error) {
                 toastr.error('Error fetching location: ' + error.message);
             }, {
@@ -609,11 +610,19 @@ function initConnectMap() {
   const connectionLines = L.layerGroup();
 
   $.getJSON("<?php echo base_url('infrastructure/getMapData') ?>", elements => {
+    console.log(elements);
     elements.forEach(el => {
       if (drawn.has(el.elmCode)) return; 
       drawn.add(el.elmCode);
 
       const icon = typeIcons[el.elmType]||typeIcons.Default;
+      const cables =  (() => {
+          try {
+                return JSON.parse(el.carriageCables || '[]');
+              } catch {
+                  return [];
+              }
+      })();
       const marker = L.marker([parseFloat(el.latitude), parseFloat(el.longitude)], { icon })
         .bindPopup(`
           <strong>${el.elmCode}</strong><br>
@@ -621,8 +630,10 @@ function initConnectMap() {
           <strong>District:</strong> ${el.districtName}<br>
           <strong>Size:</strong> ${el.SizeLabel||'N/A'}<br>
           <strong>Condition:</strong> ${el.elmCondition}<br>
-          <strong>Carriage Cable(s):</strong><br> ${Array.isArray(el.carriageCables) && el.carriageCables.length ? el.carriageCables.join('<br>') : (el.carriageCables || 'N/A')}
-        `);
+          <strong>Sources:</strong><br>         
+          ${
+              cables.length>0 ? cables.map(c => `<strong>${c.srcElementCode || ''} </strong>- ${c.cableInfo || ''}`).join('<br>') : ''
+          }`);
       markerCluster.addLayer(marker);
 
       if (el.srcElementCode) {
@@ -903,6 +914,11 @@ function initConnectMap() {
             manhole_width: $(this).data('manhole-width'),
             manhole_depth: $(this).data('manhole-depth'),
             manhole_diameter: $(this).data('manhole-diameter'),
+            construction_material: $(this).data('construction-material'),
+            access_restriction: $(this).data('access-restriction'),
+            cover_type: $(this).data('cover-type'),
+            manhole_location: $(this).data('manhole-location'),
+            operating_status: $(this).data('operating-status'),
         };
 
         populateCommonFields(data);
@@ -919,14 +935,17 @@ function initConnectMap() {
         }
     });
 
-  $('.delete-pole').click(function(){
-      let pole_id = $(this).data('pole-id');
-      let pole_code = $(this).data('name');
-      $('#delete-pole-id').val(pole_id);
-      $('#delete-pole-code').val(pole_code);
+  $('.delete-element').click(function(){
+      let element_id = $(this).data('element-id');
+      let element_code = $(this).data('element-name');
+      let element_type = $(this).data('element-type');
+      $('#delete-element-id').val(element_id);
+      $('#delete-element-code').val(element_code);
+      $('#delete-element-type').val(element_type);
 
-      $('#delete-pole-name').text(pole_code);
-      $('#delete-pole-id').text(pole_id);
+      $('#delete-element-name').text(element_code);
+      $('#delete-element-id').text(element_id);
+      $('#spn-delete-element-type').text(element_type);
   })
 
 
@@ -993,12 +1012,13 @@ function initConnectMap() {
         $('#elm-type').val(data.infra_type);
         $('#infra-code').val(data.element_code);
         $('#elm-condition').val(data.element_condition || '');
-        $('#district-id').val(data.district_id).prop('disabled', true);
+        $('#district-id').val(data.district_id).prop('readonly', true);
         $('#latitude').val(data.latitude);
         $('#longitude').val(data.longitude);
         $('#infra-type').val(data.infra_type);
         $('#action-title').text(`${data.title} ${data.element_code}`);
         $('.infra-form').data('initmsg', data.title);
+        $('#infra-coordinates').text('Lat: ' + data.latitude + ', Lng: ' + data.longitude);  
     }
 
     function showPoleFields(data) {      
@@ -1019,6 +1039,11 @@ function initConnectMap() {
         $('#manhole-length').val(data.manhole_length || 0);
         $('#manhole-depth').val(data.manhole_depth || 0);
         $('#manhole-diameter').val(data.manhole_diameter || 0);
+        $('#construction-material').val(data.construction_material || '');
+        $('#access-restriction').val(data.access_restriction || '');
+        $('#cover-type').val(data.cover_type || '');
+        $('#manhole-location').val(data.manhole_location || '');
+        $('#operating-status').val(data.operating_status || '');
 
         const isCircular = parseFloat(data.manhole_diameter || 0) > 0;
         $('#manhole-circular').prop('checked', isCircular);
@@ -1187,6 +1212,8 @@ function bulkFileUpload(form,file_elm,act_key){
         });  
 }
 
+
+
 $('#print-report').click(function(){
   let elm = $(this).data('report');
     console.log('attempting printing',elm)
@@ -1221,6 +1248,27 @@ function print_elm(elem){
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return Math.round(EARTH_RADIUS_METERS * c);
+      }
+
+
+      /**
+       * Performs a POST request to the given URL with the provided data and navigates to the URL on success.
+       * @param {string} url - URL to navigate to after posting data.
+       * @param {object} data - Data to post to the URL.
+       */
+      function getURLdata(url, data) {
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: data,
+          success: function() {
+            window.location.href = url;
+          },
+          error: function(xhr, status, error) {
+            console.error('Error posting data:', xhr, status, error);
+            toastr.error('Error posting data: ' + error);
+          }
+        });
       }
 
 </script>

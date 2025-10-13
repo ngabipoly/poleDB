@@ -58,4 +58,4 @@
     </ul>
   </nav>  
   <!-- /.navbar -->
-<?php echo view('template\menu') ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'menu') ?>

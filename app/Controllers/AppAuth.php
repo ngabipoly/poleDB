@@ -10,7 +10,7 @@ use App\Models\LogLoginAttemptModel;
 use Config\Services;
 
 helper('App\Helpers\CustomHelpers');
-
+ 
 class AppAuth extends BaseController
 {    
     protected $session;
@@ -109,7 +109,7 @@ class AppAuth extends BaseController
             $redircet_url = base_url('home');
 
             if($user["force_pwd_change"]==='Y'){
-                $redircet_url = base_url('reset-password');
+                $redircet_url = base_url('administration/change-pass');
             }
 
             // Initialize session and store user data
@@ -188,6 +188,76 @@ class AppAuth extends BaseController
         } catch (\Throwable $e) {
             log_message('error', '[LOGIN ATTEMPT ERROR] ' . $e->getMessage());
         }
+    }
+
+    public function changeMyPassword()
+    {
+        $this->session->start();
+        $userData = $this->session->get('userData');
+        if (!$userData) {
+            return redirect()->to(base_url('/'))->with('error', 'User not logged in.');
+        }
+
+        if ($userData['force_change'] !== 'Y') {
+            return redirect()->to(base_url('home'))->with('info', 'Password change not required.');
+        }
+
+        $data['page'] = "Change Password";
+        return view('forms/change-password', $data);
+    }
+
+    public function addMyNewPassword()
+    {
+        try {
+            $this->session->start();
+            $userData = $this->session->get('userData');
+            if (!$userData) {
+                return jEncodeResponse([], "User not logged in.", 'error', 401, false);
+            }
+
+            $pfNumber = $userData['pfNumber'];
+            $currentPwd = trim(htmlspecialchars($this->request->getPost('current_password')));
+            $newPwd = trim(htmlspecialchars($this->request->getPost('new_password')));
+            $confirmPwd = trim(htmlspecialchars($this->request->getPost('confirm_password')));
+
+            if (empty($currentPwd) || empty($newPwd) || empty($confirmPwd)) {
+                log_message('error', '[CHANGE PASSWORD ERROR User: ' . $pfNumber . '] All password fields are required.');
+                throw new \Exception("All password fields are required.");
+            }
+
+            if ($newPwd !== $confirmPwd) {
+                log_message('error', '[CHANGE PASSWORD ERROR User: ' . $pfNumber . '] New password and confirmation do not match.');
+                throw new \Exception("New password and confirmation do not match.");
+            }
+
+            $user = $this->userModel->where(['user_pf' => $pfNumber])->first();
+            if (!$user) {
+                log_message('error', '[CHANGE PASSWORD ERROR User: ' . $pfNumber . '] User not found: ' . $pfNumber);
+                throw new \Exception("User not found.");
+            }
+
+            if (!password_verify($currentPwd, $user['password_hash'])) {
+                log_message('error', '[CHANGE PASSWORD ERROR User: ' . $pfNumber . '] Current password is incorrect.');
+                throw new \Exception("Current password is incorrect.");
+            }
+
+            $newHash = password_hash($newPwd, PASSWORD_BCRYPT);
+            if (!$this->userModel->update($user['id'], ['password_hash' => $newHash, 'force_pwd_change' => 'N'])) {
+                log_message('error', '[CHANGE PASSWORD ERROR User: ' . $pfNumber . '] Failed to update password.');
+                throw new \Exception("Failed to update password.");
+            }
+
+            // Update session data
+            $userData['force_change'] = 'N';
+            $this->session->set('userData', $userData);
+
+            return jEncodeResponse([], "Password changed successfully.", 'success', 200, true);
+
+        } catch (\Throwable $e) {
+            log_message('error', '[CHANGE PASSWORD ERROR User: ' . $pfNumber . '] ' . $e->getMessage());
+            return jEncodeResponse([], "An internal error occurred.", 'error', 500, false);
+        }
+
     }
 
     public function groupByCategory(array $items): array {

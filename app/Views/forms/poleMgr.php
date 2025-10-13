@@ -1,4 +1,4 @@
-<?php echo view('template/partial-header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header'); ?>
 <style type="text/css">
         .marker-icon {
             width: 14px;
@@ -322,4 +322,4 @@
     </div>
 </div>
 
-<?php echo view('template/partial-footer'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>

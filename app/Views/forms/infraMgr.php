@@ -1,4 +1,4 @@
-<?php echo view('template/partial-header'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header'); ?>
 <style type="text/css">
         .marker-icon {
             width: 14px;
@@ -117,7 +117,7 @@
                                     
                                     <div class="table-responsive" id="pole-view">
                                         <h4>Pole Listing</h4>
-                                        <table id="poles-table" class="table table-bordered table-striped table-hover table-sm display data-table nowrap" width="100%" data-order='[[ 8, "desc" ]]' aria-label="Pole Listing Table">
+                                        <table id="poles-table" class="table table-bordered table-striped table-hover table-sm text-sm display data-table nowrap" width="100%" data-order='[[ 8, "desc" ]]' aria-label="Pole Listing Table">
                                             <caption class="sr-only">Pole Listing Table</caption>
                                             <thead class="thead-dark">
                                                 <tr>
@@ -147,6 +147,14 @@
                                                         <td class="text-sm"><?php echo esc($pole['elmCreatedAt']) ?></td>
                                                         <td class="text-sm">
                                                             <div class="d-flex flex-row" style="gap:2px;">
+                                                                <?php $url = base_url('infrastructure/element-details/' . $pole['elmId']); ?>
+                                                                <a class="btn bg-navy btn-xs view-infra rounded-circle d-flex align-items-center justify-content-center p-0"  
+                                                                    style="width:25px; height:25px;"
+                                                                    title="View Pole Data"
+                                                                    href="<?php echo $url; ?>"
+                                                                >
+                                                                    <i class="fas fa-clipboard-list"></i>
+                                                                </a>
                                                                 <button class="btn btn-info btn-xs edit-infra rounded-circle d-flex align-items-center justify-content-center p-0"  
                                                                     style="width:25px; height:25px;"
                                                                     title="Edit Pole"
@@ -179,13 +187,14 @@
                                                                     data-pole-size="<?php echo esc($pole['poleSizeId']) ?>">
                                                                     <i class="fas fa-link"></i>
                                                                 </button>
-                                                                <button class="btn btn-danger btn-xs delete-pole rounded-circle d-flex align-items-center justify-content-center p-0" 
+                                                                <button class="btn btn-danger btn-xs delete-element rounded-circle d-flex align-items-center justify-content-center p-0" 
                                                                     style="width:25px; height:25px;" 
-                                                                    title="Delete Pole"
                                                                     data-toggle="modal" 
                                                                     data-target="#delete-modal"
-                                                                    data-pole-id="<?php echo esc($pole['elmId']) ?>"
-                                                                    data-name="<?php echo esc($pole['elmCode']) ?>">
+                                                                    title="Delete <?php echo esc($pole['elmType']); ?>"
+                                                                    data-element-type="<?php echo esc($pole['elmType']) ?>"
+                                                                    data-element-id="<?php echo esc($pole['elmId']) ?>"
+                                                                    data-element-name="<?php echo esc($pole['elmCode']) ?>">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </div>
@@ -197,7 +206,7 @@
                                     </div>
                                     <div class="table-responsive" id="manhole-view" style="display: none;">
                                         <h4>Manhole Listing</h4>
-                                        <table id="manhole-table" class="table table-bordered table-striped table-hover table-sm display data-table nowrap" width="100%" data-order='[[ 10, "desc" ]]' >
+                                        <table id="manhole-table" class="table table-bordered table-striped table-hover table-sm text-sm display data-table nowrap" width="100%" data-order='[[ 8, "desc" ]]' >
                                             <caption class="sr-only">Manhole Listing</caption>
                                             <thead class="thead-dark">
                                                 <tr>
@@ -207,8 +216,6 @@
                                                     <th class="text-sm"><strong>Latitude</strong></th>
                                                     <th class="text-sm"><strong>Longitude</strong></th>
                                                     <th class="text-sm" title="Depth in meters"><strong>Manhole Depth</strong></th>
-                                                    <th class="text-sm" title="Length in meters"><strong>Manhole Length</strong></th>
-                                                    <th class="text-sm" title="Width in meters"><strong>Manhole Width</strong></th>
                                                     <th class="text-sm"><strong>Manhole Condition</strong></th>
                                                     <th class="text-sm"><strong>Added By</strong></th>
                                                     <th class="text-sm"><strong>Date Added</strong></th>
@@ -224,13 +231,18 @@
                                                         <td class="text-sm"><?php echo esc($manhole['latitude']) ?></td>
                                                         <td class="text-sm"><?php echo esc($manhole['longitude']) ?></td>
                                                         <td class="text-sm"><?php echo esc($manhole['manholeDepth']) ?></td>
-                                                        <td class="text-sm"><?php echo esc($manhole['manholeLength']) ?></td>
-                                                        <td class="text-sm"><?php echo esc($manhole['manholeWidth']) ?></td>
                                                         <td class="text-sm"><?php echo esc($manhole['elmCondition']) ?></td>
                                                         <td class="text-sm"><?php echo esc($manhole['lastname'].', '.$manhole['firstname']) ?></td>
                                                         <td class="text-sm"><?php echo esc($manhole['elmCreatedAt']) ?></td>
                                                         <td class="text-sm">
                                                             <div class="d-flex flex-row" style="gap:2px;">
+                                                                <?php $url = base_url('infrastructure/element-details/' . $manhole['elmId']); ?>
+                                                                <a class="btn bg-navy btn-xs media-view rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                                        style="width:25px; height:25px;"
+                                                                        title="View Manhole Data"
+                                                                        href="<?php echo $url; ?>">
+                                                                    <i class="fas fa-clipboard-list"></i>
+                                                                </a>
                                                                 <button class="btn btn-info btn-xs edit-infra rounded-circle d-flex align-items-center justify-content-center p-0"
                                                                         style="width:25px; height:25px;"
                                                                         data-toggle="modal" 
@@ -246,10 +258,16 @@
                                                                         data-manhole-length="<?php echo $manhole['manholeLength'] ?>"
                                                                         data-manhole-width="<?php echo $manhole['manholeWidth'] ?>"
                                                                         data-manhole-diameter="<?php echo $manhole['manholeDiameter'] ?>"
-                                                                        data-element-condition="<?php echo esc($manhole['elmCondition']) ?>">
+                                                                        data-element-condition="<?php echo esc($manhole['elmCondition']) ?>"
+                                                                        data-cover-type="<?php echo esc($manhole['coverType']) ?>"
+                                                                        data-manhole-location="<?php echo esc($manhole['manholeLocation']) ?>"
+                                                                        data-operating-status="<?php echo esc($manhole['operatingStatus']) ?>"
+                                                                        data-construction-material="<?php echo esc($manhole['constructionMaterial']) ?>"
+                                                                        data-access-restriction="<?php echo esc($manhole['accessRestriction']) ?>"
+                                                                        >
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
-                                                                <button class="btn btn-secondary btn-xs media-link rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                                <button class="btn btn-success btn-xs media-link rounded-circle d-flex align-items-center justify-content-center p-0"
                                                                         style="width:25px; height:25px;"
                                                                         data-toggle="modal" 
                                                                         data-target="#media-link-modal"
@@ -257,12 +275,14 @@
                                                                         data-element-code="<?php echo esc($manhole['elmCode']) ?>">
                                                                     <i class="fas fa-link"></i>
                                                                 </button>
-                                                                <button class="btn btn-danger btn-xs delete-manhole rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                                <button class="btn btn-danger btn-xs delete-element rounded-circle d-flex align-items-center justify-content-center p-0"
                                                                         style="width:25px; height:25px;"
                                                                         data-toggle="modal" 
                                                                         data-target="#delete-modal"
-                                                                        data-manhole-id="<?php echo $manhole['elmId'] ?>"
-                                                                        data-name="<?php echo esc($manhole['elmCode']) ?>">
+                                                                        title="Delete <?php echo esc($manhole['elmType']); ?>"
+                                                                        data-element-type="<?php echo esc($manhole['elmType']) ?>"
+                                                                        data-element-id="<?php echo esc($manhole['elmId']) ?>"
+                                                                        data-element-name="<?php echo esc($manhole['elmCode']) ?>">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </div>
@@ -287,96 +307,155 @@
 </div>
 
 <!-- Add/Edit Pole Modal -->
-<div class="modal fade" id="infrastructure-modal">
+<div class="modal text-sm fade" id="infrastructure-modal">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <form action="infrastructure/save" method="post" class="db-submit infra-form" id="element-form" data-initmsg="Adding new pole">
                 <?php echo csrf_field(); ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><span id="action-title">Add Pole </span><i class="fas fa-tower"></i></h5>
+                    <div class="modal-subtitle"><small id="infra-coordinates" class="form-text text-muted"></small></div>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="elmId" id="elm-id">
-                    <input type="hidden" name="elmType" id="elm-type">
-                    <div class="form-group">
-                        <label for="district-code">District</label>
-                        <select name="districtId" id="district-id" class="form-control select2">
-                            <option value="">Select District</option>
-                            <?php
-                            $grouped = [];
+                    <input type="hidden" name="elmType" id="elm-type">                    
+                    <input type="hidden" class="form-control" id="infra-code" name="infra_code" readonly >
+                    <input type="hidden" class="form-control form-control-sm" id="longitude" name="elmLongitude" required readonly>   
+                    <input type="hidden" class="form-control form-control-sm" id="latitude" name="elmLatitude" required readonly>                        
+                        <small>
+                            <a href="#" onclick="getLocation(); return false;" class="btn btn-primary btn-xs">
+                                <i class="fas fa-map-marker-alt"></i> Refresh Location
+                            </a>
+                        </small>                        
+                    <div class="row mt-0 mb-0">
+                        <div class="col-sm-6 mb-0 mt-0">
+                            <div class="form-group mb-0 mt-o">
+                                <label for="district-code" class="col-form-label-sm">District</label>
+                                <select name="districtId" id="district-id" class="form-control select2 form-control-sm">
+                                    <option value="">Select District</option>
+                                    <?php
+                                    $grouped = [];
 
-                            // Group districts by RegionName
-                            foreach ($districts as $district) {
-                                $region = $district['RegionName'];
-                                if (!isset($grouped[$region])) {
-                                    $grouped[$region] = [];
-                                }
-                                $grouped[$region][] = $district;
-                            }
+                                    // Group districts by RegionName
+                                    foreach ($districts as $district) {
+                                        $region = $district['RegionName'];
+                                        if (!isset($grouped[$region])) {
+                                            $grouped[$region] = [];
+                                        }
+                                        $grouped[$region][] = $district;
+                                    }
 
-                            // Output optgroups and options
-                            foreach ($grouped as $regionName => $districtList) {
-                                echo '<optgroup label="' . htmlspecialchars($regionName) . '">';
-                                foreach ($districtList as $district) {
-                                    echo '<option value="' . htmlspecialchars($district['districtId']) . '" ' .
-                                        'data-region-code="' . htmlspecialchars($district['RegionCode']) . '" ' .
-                                        'data-region-name="' . htmlspecialchars($district['RegionName']) . '" ' .
-                                        'data-district-code="' . htmlspecialchars($district['code']) . '">' .
-                                        htmlspecialchars($district['districtName']) .
-                                        '</option>';
-                                }
-                                echo '</optgroup>';
-                            }
-                            ?>
-                        </select>
-
-                    </div>
-                        <input type="hidden" class="form-control" id="infra-code" name="infra_code" readonly >
-                   <small> <a href="#" onclick="getLocation(); return false;" class="btn btn-primary btn-xs" ><i class="fas fa-map-marker-alt"></i> Refresh Location</a> </small>
-
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="longitude">Longitude</label>
-                                <input type="text" class="form-control" id="longitude" name="elmLongitude" required readonly>                        
+                                    // Output optgroups and options
+                                    foreach ($grouped as $regionName => $districtList) {
+                                        echo '<optgroup label="' . htmlspecialchars($regionName) . '">';
+                                        foreach ($districtList as $district) {
+                                            echo '<option value="' . htmlspecialchars($district['districtId']) . '" ' .
+                                                'data-region-code="' . htmlspecialchars($district['RegionCode']) . '" ' .
+                                                'data-region-name="' . htmlspecialchars($district['RegionName']) . '" ' .
+                                                'data-district-code="' . htmlspecialchars($district['code']) . '">' .
+                                                htmlspecialchars($district['districtName']) .
+                                                '</option>';
+                                        }
+                                        echo '</optgroup>';
+                                    }
+                                    ?>
+                                </select>
                             </div>                            
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-sm-6 mb-0 mt-0">
+                            <div class="form-group mb-0 mt-0">
+                                <label for="elm-condition" class="col-form-label-sm">Condition</label>
+                                <select name="elmCondition" id="elm-condition" class="form-control select2 form-control-sm">
+                                    <option value="">--Select Condition--</option>
+                                    <option value="Good">Good</option>
+                                    <option value="Re-Used">Re-Used</option>
+                                    <option value="Damaged">Damaged</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-0 mb-0" style="display: none;">
+                        <div class="col-sm-6 mb-0 mt-0">
                             <div class="form-group">
-                                <label for="latitude">Latitude</label>
-                                <input type="text" class="form-control" id="latitude" name="elmLatitude" required readonly>
+                                <label for="longitude" class="col-form-label-sm">Longitude</label>                     
+                            </div>                            
+                        </div>
+                        <div class="col-sm-6 mb-0 mt-0">
+                            <div class="form-group">
+                                <label for="latitude" class="col-form-label-sm">Latitude</label>
                             </div>                            
                         </div>
                     </div>
 
-                    <div class="form-group pole-data">
-                        <label for="pole-type">Pole Type</label>
-                        <select name="poleTypeId" id="pole-type" class="form-control select2">
+                    <div class="form-group pole-data mt-0 mb-0">
+                        <label for="pole-type" class="col-form-label-sm">Pole Type</label>
+                        <select name="poleTypeId" id="pole-type" class="form-control select2 form-control-sm">
                             <option value="">--Select Type--</option>
                             <?php foreach ($pole_types as $pole_type) { echo '<option value="' . $pole_type['TypeId'] . '">' . $pole_type['TypeName'] . '</option>'; } ?>
                         </select>
                     </div>
 
-                    <div class="form-group pole-data">
+                    <div class="form-group pole-data mt-0 mb-0">
                         <label for="pole-size">Pole Size</label>
                         <select name="poleSizeId" id="pole-size" class="form-control select2">
                             <option value="">--Select Size--</option>
                             <?php foreach ($sizes as $size) { echo '<option value="' . $size['poleSizeId'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="elm-condition">Condition</label>
-                        <select name="elmCondition" id="elm-condition" class="form-control select2">
-                            <option value="">--Select Condition--</option>
-                            <option value="Good">Good</option>
-                            <option value="Re-Used">Re-Used</option>
-                            <option value="Damaged">Damaged</option>
-                        </select>
-                    </div>
-                    <div class="manhole-data">
-                        <div class="form-group d-flex align-items-center">
-                            <label for="manhole-circular" class="mb-0 mr-4">Is the manhole circular?</label>
+                    <div class="manhole-data mt-0 mb-0">
+                        <div class="form-group mt-0 mb-0">
+                            <label for="manhole-location" class="col-form-label-sm">Location</label>
+                            <input type="text" class="form-control form-control-sm" id="manhole-location" name="manholeLocation" placeholder="Enter street/Road Name" value="">
+                        </div>
+                        <div class="row mt-0 mb-0">
+                            <div class="col-sm-6 mb-0 mt-0">
+                                <div class="form-group">
+                                    <label for="construction-material" class="col-form-label-sm">Construction Material</label>
+                                    <select name="constructionMaterial" id="construction-material" class="form-control select2 form-control-sm">
+                                        <option value="">--Select Material--</option>
+                                        <option value="Concrete">Concrete</option>
+                                        <option value="Brick">Brick</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mb-0 mt-0">
+                                <div class="form-group">
+                                    <label for="cover-type" class="col-form-label-sm">Cover Type</label>
+                                    <select name="coverType" id="cover-type" class="form-control select2 form-control-sm">
+                                        <option value="">--Select Cover Type--</option>
+                                        <option value="Casted">Casted</option>
+                                        <option value="Metal">Metal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 mb-0 mt-0">
+                                <div class="form-group mb-0 mt-0">
+                                    <label for="access-restriction" class="col-form-label-sm">Access Restriction</label>
+                                    <select name="accessRestriction" id="access-restriction" class="form-control select2 form-control-sm">
+                                        <option value="">--Select Restriction--</option>
+                                        <option value="L">Locked</option>
+                                        <option value="U">Unlocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mb-0 mt-0">
+                                <div class="form-group mb-0 mt-0">
+                                    <label for="operating-status" class="col-form-label-sm">Operating Status</label>
+                                    <select name="operatingStatus" id="operating-status" class="form-control select2 form-control-sm">
+                                        <option value="">--Select Status--</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Sealed by Road">Sealed by Road</option>
+                                        <option value="Under Maintenance">Under Maintenance</option>
+                                        <option value="Damaged">Damaged</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group d-flex align-items-center mb-0">
+                            <label for="manhole-circular" class="col-form-label-sm mb-0 mt-0 mr-4">Is the manhole circular?</label>
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" class="custom-control-input" id="manhole-circular" name="manholeCircular">
                                 <label class="custom-control-label" for="manhole-circular">Yes</label>
@@ -384,32 +463,32 @@
                         </div>                        
                     </div>
                     
-                    <div class="row manhole-data">
-                        <div class="col-md-4 col-sm-4 col-xs-3 non-circular-data">
+                    <div class="row manhole-data mt-0 mb-0">
+                        <div class="col-md-4 col-sm-4 col-xs-3 non-circular-data mt-0 mb-0">
                             <div class="form-group">
-                                <label for="manhole-width">Width</label>
-                                <input type="number" class="form-control" id="manhole-width" name="manholeWidth" value="0">
+                                <label for="manhole-width" class="form-label col-form-label-sm">Width</label>
+                                <input type="number" class="form-control form-control-sm" id="manhole-width" name="manholeWidth" value="0">
                             </div>                            
                         </div>
 
-                        <div class="col-md-4 col-sm-4 col-xs-3 non-circular-data">
-                            <div class="form-group">
-                                <label for="manhole-length">Length</label>
-                                <input type="number" class="form-control" id="manhole-length" name="manholeLength" value="0">
+                        <div class="col-md-4 col-sm-4 col-xs-3 non-circular-data mt-0 mb-0">
+                            <div class="form-group mt-0 mb-0">
+                                <label for="manhole-length" class="form-label col-form-label-sm">Length</label>
+                                <input type="number" class="form-control form-control-sm" id="manhole-length" name="manholeLength" value="0">
                             </div>                            
                         </div>
                         
-                        <div class="col-md-4 col-sm-4 col-xs-3 manhole-data" id="circular-data">
-                            <div class="form-group">
-                                <label for="manhole-diameter">Diameter</label>
-                                <input type="number" class="form-control" id="manhole-diameter" name="manholeDiameter" value="0">
+                        <div class="col-md-4 col-sm-4 col-xs-3 manhole-data mt-0 mb-0" id="circular-data">
+                            <div class="form-group mt-0 mb-0">
+                                <label for="manhole-diameter" class="col-form-label-sm">Diameter</label>
+                                <input type="number" class="form-control form-control-sm" id="manhole-diameter" name="manholeDiameter" value="0">
                             </div>                            
                         </div>
 
-                        <div class="col-md-4 col-sm-4 col-xs-3 manhole-data">
-                            <div class="form-group">
-                                <label for="manhole-depth">Depth</label>
-                                <input type="number" class="form-control" id="manhole-depth" name="manholeDepth" value="0">
+                        <div class="col-md-4 col-sm-4 col-xs-3 manhole-data mt-0 mb-0">
+                            <div class="form-group mt-0 mb-0">
+                                <label for="manhole-depth" class="col-form-label-sm">Depth</label>
+                                <input type="number" class="form-control form-control-sm" id="manhole-depth" name="manholeDepth" value="0">
                             </div>
                         </div>
                     </div>
@@ -424,19 +503,20 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="delete-modal">
+<div class="modal fade text-sm" id="delete-modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="<?= base_url('infrastructre/delete') ?>" method="post" class="db-submit" id="delete-form" data-initmsg="Deleting pole">
+            <form action="<?= base_url('infrastructure/delete') ?>" method="post" class="db-submit" id="delete-form" data-initmsg="Deleting pole">
                 <?php echo csrf_field(); ?>
                 <div class="modal-header bg-danger">
-                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Delete Pole</h5>
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Delete  <span id="spn-delete-element-type"></span></h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete <strong id="delete-pole-name"></strong>?</p>
-                    <input type="hidden" name="delete_pole_id" id="delete-pole-id">
-                    <input type="hidden" name="delete_pole_code" id="delete-pole-code">
+                    <p>Are you sure you want to delete <strong id="delete-element-name"></strong>?</p>
+                    <input type="hidden" name="delete_element_id" id="delete-element-id">
+                    <input type="hidden" name="delete_element_code" id="delete-element-code">
+                    <input type="hidden" name="delete_element_type" id="delete-element-type">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -448,14 +528,14 @@
 </div>
 
 <!-- Media link Modal -->
-<div class="modal fade" id="media-link-modal">
+<div class="modal fade text-sm" id="media-link-modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary">
                 <h5 class="modal-title"><i class="fas fa-link"></i> Link Media to <span id="destination-media-code"></span> </h5>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
-            <form action="<?php echo base_url('infrastructre/linkMedia') ?>" method="post" class="db-submit" id="media-link-form" data-initmsg="Linking media">
+            <form action="<?php echo base_url('infrastructure/linkMedia') ?>" method="post" class="db-submit" id="media-link-form" data-initmsg="Linking media">
                 <?php echo csrf_field(); ?>
                 <input type="hidden" name="media-destination-element" id="media-destination-element" value="">
                 <input type="hidden" name="media-destination-code" id="media-destination-code" value="">
@@ -467,7 +547,7 @@
                 <input type="hidden" name="formType" value="linkMedia" class="">
                 <div class="modal-body">
                     <div class="row mb-0">
-                        <div class="col-md-6">
+                        <div class="col-md-6 mb-0">
                             <div class="form-group">
                                 <label for="media-type" class="col-form-label-sm pb-0">Cable Type</label>
                                 <select class="form-control form-control-sm" id="media-type" name="media_type">
@@ -478,7 +558,7 @@
                                 </select>
                             </div>                        
                         </div>  
-                        <div class="col-md-6">
+                        <div class="col-md-6 mb-0">
                             <div class="form-group">
                                 <label for="media-capacity" class="col-form-label-sm pb-0">Cable Capacity</label>
                                 <select class="form-control form-control-sm" id="media-capacity" name="media_capacity">
@@ -488,7 +568,7 @@
                         </div>
                     </div>
                     <div class="row mt-0 mb-0">
-                        <div class="col-md-6">
+                        <div class="col-md-6 mb-0 mt-0">
                             <div class="form-group">
                                 <label for="media-source-type" class="col-form-label-sm pb-0">Source Type</label>
                                 <select class="form-control form-control-sm" id="media-source-type" name="media_source_type">
@@ -498,7 +578,7 @@
                                 </select>
                             </div>                            
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 mb-0 mt-0">
                             <div class="form-group">
                                 <label for="source-element" class="col-form-label-sm pb-0">Source Element</label>
                                 <select class="form-control form-control-sm" id="source-element" name="source_element">
@@ -519,4 +599,4 @@
     </div>
 </div>
 
-<?php echo view('template/partial-footer'); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>

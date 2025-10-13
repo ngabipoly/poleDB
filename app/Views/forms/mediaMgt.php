@@ -1,5 +1,5 @@
 <?php 
-    echo view('template/partial-header');
+    echo view('template'.DIRECTORY_SEPARATOR.'partial-header');
 ?>
 <div class="content-wraper">
     <section class="content-header">
@@ -143,5 +143,5 @@
 <!-- Footer -->
 
 <?php 
-    echo view('template/partial-footer');
+    echo view('template'.DIRECTORY_SEPARATOR.'partial-footer');
 ?>
