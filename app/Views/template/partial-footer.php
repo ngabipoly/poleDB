@@ -75,7 +75,6 @@
       "responsive": true, "lengthChange": false, "autoWidth": false,
       "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-
   <?php
     if($page === 'Dashboard'){ ?>
             // Load summary stats
@@ -460,9 +459,6 @@
     $('#poleSizeModalLabel').text('Edit Pole Size');
   })
 
-  
- 
-
   $(".delete-pole-size").click(function(){
     let id = $(this).data('id');
     let label = $(this).data('label');
@@ -696,6 +692,7 @@ function initConnectMap() {
     }
 
       $('#action-title').text(title);
+      $('.leasor-fields').hide();
   });
 
   $('#manhole-circular').change(function(){
@@ -807,7 +804,8 @@ function initConnectMap() {
       $('#element-latitude').val(currentLatitude);
       $('#media-link-modal').modal('show');
 
-      console.log(currentLatitude, currentLatitude)
+      console.log('media-destination-code', mediaTypeName)
+      console.log('element-longitude', currentLongitude, 'element-latitude', currentLatitude)
     });
 
     //Get media capacities depending on selected media type
@@ -907,6 +905,10 @@ function initConnectMap() {
             latitude: $(this).data('latitude'),
             longitude: $(this).data('longitude'),
             pole_type: $(this).data('pole-type'),
+            utel_owned: $(this).data('utel-owned'),
+            leasor_id: $(this).data('leasor-id'),
+            usage_start_date: $(this).data('usage-start-date'),
+            usage_end_date: $(this).data('usage-end-date'),
             element_condition: $(this).data('element-condition'),
             title: $(this).data('infra-title'),
             infra_type: $(this).data('infra-type'),
@@ -921,8 +923,6 @@ function initConnectMap() {
             operating_status: $(this).data('operating-status'),
         };
 
-        populateCommonFields(data);
-
         switch (data.infra_type) {
             case 'Pole':
                 showPoleFields(data);
@@ -933,6 +933,8 @@ function initConnectMap() {
             default:
                 console.warn('Unhandled infra type:', data.infra_type);
         }
+
+        populateCommonFields(data);
     });
 
   $('.delete-element').click(function(){
@@ -947,6 +949,54 @@ function initConnectMap() {
       $('#delete-element-id').text(element_id);
       $('#spn-delete-element-type').text(element_type);
   })
+
+  //Unlink all infrastructure
+  $('#unlink-all').click(function(){
+     let links = $('#all-ids').val();
+     $('#delink-element-ids').val(links);
+  })
+
+  //Leasor Management
+  $('#btn-add-leasor').click(function(e){
+    e.preventDefault();
+    $('#leasorModalLabel').text('Add New Leasor');
+    $('#leasorForm')[0].reset();
+    $('#leasorModal').modal('show');
+  })
+
+  $('.btn-edit-leasor').click(function(e){
+    e.preventDefault();
+    let leasor_id = $(this).data('leasor-id');
+    let leasor_name = $(this).data('leasor-name');
+    let contact_person = $(this).data('contact-person');
+    let leasor_email = $(this).data('contact-email');
+    let leasor_phone = $(this).data('contact-number');
+    let leasor_address = $(this).data('leasor-address');
+    let contract_start = $(this).data('lease-start');
+    let contract_end = $(this).data('lease-end');
+   
+    $('#leasorModalLabel').text(`Editing Leasor: ${leasor_name}`);
+    $('#_method').val('EDIT');
+    $('#leasorId').val(leasor_id);
+    $('#leasorName').val(leasor_name);
+    $('#contactPerson').val(contact_person);
+    $('#contactEmail').val(leasor_email);
+    $('#contactNumber').val(leasor_phone);
+    $('#contactEmail').val(leasor_email);
+    $('#leaseStart').val(contract_start);
+    $('#leaseEnd').val(contract_end);
+    $('#leasorModal').modal('show');
+  })
+
+  $('.deleteLeasorBtn').click(function(e){
+    e.preventDefault();
+    let leasor_id = $(this).data('delete-leasor-id');
+    let leasor_name = $(this).data('delete-leasor-name');
+    $('#deleteLeasorId').val(leasor_id);
+    $('#deleteLeasorName').val(leasor_name);
+    $('#spn-delete-leasor-name').text(leasor_name); 
+  })
+
 
 
 
@@ -997,6 +1047,27 @@ function initConnectMap() {
       db_submit(target,$(this),msg);
     });
 
+   //Toggle leasor fields display based on ownership type
+    $('#utel-owned').change(function () {
+
+        if ($(this).is(':checked')) {
+
+            // UTel-owned
+            $(this).val('Y');
+            $('#utelOwned').val('Y');
+            $('.leasor-fields').hide();
+            // Clear fields
+            $('#leasorId, #lease-start-date').val('');
+
+        } else {
+
+            // Leased
+            $(this).val('N');
+            $('#utelOwned').val('N');
+            // Show lessor fields
+            $('.leasor-fields').show();
+        }
+    });
 
    function resetAllFields() {
         $('#element-form').trigger('reset');
@@ -1019,6 +1090,18 @@ function initConnectMap() {
         $('#action-title').text(`${data.title} ${data.element_code}`);
         $('.infra-form').data('initmsg', data.title);
         $('#infra-coordinates').text('Lat: ' + data.latitude + ', Lng: ' + data.longitude);  
+        $('#utelOwned').val(data.utel_owned);
+         if (data.utel_owned === 'Y') {
+            $('.leasor-fields').hide();
+            $('#utel-owned').prop('checked', true);
+            $('#leasorId, #lease-start-date, #lease-end-date').val('');
+        } else {
+            $('.leasor-fields').show();
+            $('#leasor').val(data.leasor_id);
+            $('#lease-start-date').val(data.usage_start_date);
+            $('#lease-end-date').val(data.usage_end_date);
+            $('#utel-owned').prop('checked', false);
+        }
     }
 
     function showPoleFields(data) {      

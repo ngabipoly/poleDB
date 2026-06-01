@@ -10,7 +10,7 @@ class InfraCarryModel extends Model
     protected $useTimestamps = true;
     protected $createdField = 'carryAddDt';
     protected $updatedField = 'carryModifyDt';
-    protected $deletedField = 'carryDeletedDt';
+    protected $deletedField = 'carryDeleteDt';
     protected $useSoftDeletes = true;
     protected $validationRules = [
         'carryElement' => 'required|integer',

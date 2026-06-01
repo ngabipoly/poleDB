@@ -17,6 +17,10 @@ class InfraElementModel extends Model
         'district',
         'latitude',
         'longitude',
+        'utel_owned',
+        'leasor_id',
+        'usageStartDate',
+        'usageEndDate',
         'notes',
         'elmAddedBy',
         'elmCreatedAt',
@@ -50,7 +54,7 @@ class InfraElementModel extends Model
     protected $updatedField  = 'elmModifiedDate';
     protected $deletedField  = 'elmDeletedDate';
     protected $validationRules    = [
-        'elmCode' => "required|is_unique[tbl_infra_element.elmCode]",
+        'elmCode' => "required|is_unique[tbl_infra_element.elmCode,elmId,{elmId}]",
         'elmType' => 'required|in_list[Manhole, Pole, OLTE,Building]',
         'elmCondition' => 'required|in_list[Good, Re-used, Damaged, stolen]',
         'latitude' => 'required|decimal',    
@@ -69,6 +73,10 @@ class InfraElementModel extends Model
         'landlordPhone' => 'permit_empty',
         'landlordEmail' => 'permit_empty|valid_email',
         'elmAddedBy' => 'required',
+        'utel_owned' => 'required|in_list[Y,N]',
+         'leasor_id' => 'permit_empty|integer',
+         'usageStartDate' => 'permit_empty|valid_date',
+         'usageEndDate' => 'permit_empty|valid_date|after_or_equal[usageStartDate]',
     ];
     protected $validationMessages = [
         'elmCode' => [
@@ -110,7 +118,21 @@ class InfraElementModel extends Model
         ],
         'elmAddedBy' => [
             'required' => 'Your session seems to have expired. Please login again.'
-        ]
+        ],
+        'utel_owned' => [
+            'required' => 'Please specify if the element is owned by UTEL.',
+            'in_list' => 'Invalid value for UTEL ownership. Please select either Y or N.'
+        ],
+        'leasor_id' => [
+            'integer' => 'Invalid leasor selection.'
+        ],
+        'usageStartDate' => [
+            'valid_date' => 'The usage start date must be a valid date.'
+        ],
+        'usageEndDate' => [
+            'valid_date' => 'The usage end date must be a valid date.',
+            'after_or_equal' => 'The usage end date must be after or equal to the usage start date.'
+        ],
     ];
     protected $skipValidation     = false;
     protected $cleanValidationRules = true;

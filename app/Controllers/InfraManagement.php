@@ -10,6 +10,7 @@ use App\Models\CarryTypeModel;
 use App\Models\CarryCapacityModel;
 use App\Models\PoleCarryingModel;
 use App\Models\InfraCarryModel;
+use App\Models\LeasorModel;
 use CodeIgniter\Log\Logger;
 
 class InfraManagement extends Controller
@@ -29,6 +30,7 @@ class InfraManagement extends Controller
     protected $capacityModel;
     protected $poleCarryingModel;
     protected $carryModel;
+    protected $leasorModel;
 
 
 
@@ -43,6 +45,7 @@ class InfraManagement extends Controller
         $this->capacityModel = new CarryCapacityModel();
         $this->poleCarryingModel = new PoleCarryingModel();
         $this->carryModel = new InfraCarryModel();
+        $this->leasorModel = new LeasorModel();
         $this->session = session();
         $this->user = $this->session->get('userData');
     }
@@ -70,6 +73,7 @@ class InfraManagement extends Controller
         $data['media_types'] = $this->carryTypeModel->findAll();
         $data['media_capacity'] = $this->capacityModel->findAll();
         $data['sizes'] = $this->poleSizes->findAll();
+        $data['leasors'] = $this->leasorModel->findAll();
         $data['page'] = 'Infrastructure Management';
         return view('forms/infraMgr', $data);
     }
@@ -135,6 +139,7 @@ class InfraManagement extends Controller
             $elmCode = $element['elmCode'];
             writeLog("Updating collection $elementType with code: $elmCode");
             $data = $this->collectInputData('elementEntries');
+            $data['elmId'] = $id;
 
             writeLog("Updating $elementType: " . json_encode($data));
 
@@ -339,12 +344,25 @@ public function deleteElement()
             $type = $this->request->getPost('elmType');
             writeLog("User: " . json_encode($this->user));
 
+            $leasorId = $this->request->getPost('leasorId');
+            if (!empty($leasorId)) {
+                $leasor = $this->leasorModel->find($leasorId);
+                if (!$leasor) {
+                    writeLog("Invalid leasor_id provided: $leasorId");
+                    throw new \Exception('Selected leasor does not exist.');
+                }
+            }
+
             $data = [
                 'elmType'     => $type,
                 'elmCondition'=> $this->request->getPost('elmCondition'),
                 'district'  => $this->request->getPost('districtId'),
                 'latitude'    => $this->request->getPost('elmLatitude'),
                 'longitude'   => $this->request->getPost('elmLongitude'),
+                'utel_owned'  => $this->request->getPost('utelOwned') === 'Y' ? 'Y' : 'N',
+                'leasor_id'   => $leasorId ?: null,
+                'usageStartDate' => $this->request->getPost('leaseStartDate') ?: null,
+                'usageEndDate' => $this->request->getPost('leaseEndDate') ?: null,
                 'notes'       => $this->request->getPost('notes'),
                 'elmAddedBy'   => $this->user['pfNumber'],
             ];
@@ -557,6 +575,60 @@ public function deleteElement()
 
         } catch (\Exception $e) {
             writeLog("Error linking media to element: " . $e->getMessage());
+            return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
+        }
+    }
+
+    /**
+     * unlinkMediaFromElement
+     * 
+     * @return json
+     */
+    public function unlinkMediaFromElement()
+    {
+        try {
+            writeLog("Initiating unlink media from elements...");
+            $carryIDs = array_filter(explode(',', $this->request->getPost('delink_element_ids')), 'is_numeric');
+            if (empty($carryIDs)) {
+                throw new \Exception('No valid carry IDs provided');
+            }
+
+            $success = 0;
+            $failed = 0;
+
+            // Prepare batch update data
+            $updateData = [];
+            foreach ($carryIDs as $carryId) {
+                $updateData[] = [
+                    'carryId' => $carryId,
+                    'carryIsDeleted' => 1,
+                    'carryDeleteBy' => $this->user['pfNumber']
+                ];
+            }
+
+            // Batch update
+            if (!$this->carryModel->updateBatch($updateData, 'carryId')) {
+                writeLog("Batch update failed for carry IDs: " . implode(',', $carryIDs));
+                throw new \Exception("Failed to mark media links as deleted.");
+            }
+
+            // Batch delete
+            foreach ($carryIDs as $carryId) {
+                if ($this->carryModel->delete($carryId)) {
+                    $success++;
+                } else {
+                    $failed++;
+                }
+            }
+
+            if ($success === 0) {
+                throw new \Exception("Failed to unlink media from all elements");
+            }
+
+            writeLog("Media unlinking completed. Success: $success, Failed: $failed.");
+            return jEncodeResponse([], "Media unlinking completed. Success: $success, Failed: $failed.", 'success', 200, true);
+        } catch (\Exception $e) {
+            writeLog("Error unlinking media: " . $e->getMessage());
             return jEncodeResponse([], $e->getMessage(), 'error', 500, false);
         }
     }

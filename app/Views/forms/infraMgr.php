@@ -168,6 +168,10 @@
                                                                     data-longitude="<?php echo esc($pole['longitude']) ?>"
                                                                     data-district-id="<?php echo esc($pole['districtId']) ?>" 
                                                                     data-pole-size="<?php echo esc($pole['poleSizeId']) ?>"
+                                                                    data-utel-owned="<?php echo esc($pole['utel_owned']) ?>"
+                                                                    data-leasor-id="<?php echo esc($pole['leasor_id']) ?>"
+                                                                    data-usage-start-date="<?php echo esc($pole['usageStartDate']) ?>"
+                                                                    data-usage-end-date="<?php echo esc($pole['usageEndDate']) ?>"
                                                                     data-element-condition="<?php echo esc($pole['elmCondition']) ?>" data-pole-type="<?php echo esc($pole['poleType']) ?>"
                                                                 >
                                                                     <i class="fas fa-edit"></i>
@@ -267,12 +271,17 @@
                                                                         >
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
-                                                                <button class="btn btn-success btn-xs media-link rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                                <button class="btn btn-success btn-xs link-infra media-link rounded-circle d-flex align-items-center justify-content-center p-0"
                                                                         style="width:25px; height:25px;"
                                                                         data-toggle="modal" 
                                                                         data-target="#media-link-modal"
                                                                         data-element-id="<?php echo $manhole['elmId'] ?>"
-                                                                        data-element-code="<?php echo esc($manhole['elmCode']) ?>">
+                                                                        data-element-code="<?php echo esc($manhole['elmCode']) ?>"
+                                                                        data-latitude="<?php echo esc($manhole['latitude']) ?>"
+                                                                        data-longitude="<?php echo esc($manhole['longitude']) ?>"
+                                                                        data-infra-type="Manhole"
+                                                                        data-infra-title="Link Manhole"
+                                                                        title="Add Upstream Link">
                                                                     <i class="fas fa-link"></i>
                                                                 </button>
                                                                 <button class="btn btn-danger btn-xs delete-element rounded-circle d-flex align-items-center justify-content-center p-0"
@@ -323,7 +332,7 @@
                     <input type="hidden" class="form-control" id="infra-code" name="infra_code" readonly >
                     <input type="hidden" class="form-control form-control-sm" id="longitude" name="elmLongitude" required readonly>   
                     <input type="hidden" class="form-control form-control-sm" id="latitude" name="elmLatitude" required readonly>                        
-                        <small>
+                        <small class="align-middle">
                             <a href="#" onclick="getLocation(); return false;" class="btn btn-primary btn-xs">
                                 <i class="fas fa-map-marker-alt"></i> Refresh Location
                             </a>
@@ -387,22 +396,72 @@
                             </div>                            
                         </div>
                     </div>
+                <div class="row pole-data mt-0 mb-0">
+                    <div class="col-sm-6 mb-0 mt-0">
+                        <div class="form-group mb-0 mt-0">
+                            <label for="pole-type" class="col-form-label-sm">Pole Type</label>
+                            <select name="poleTypeId" id="pole-type" class="form-control select2 form-control-sm">
+                                <option value="">--Select Type--</option>
+                                <?php foreach ($pole_types as $pole_type) { echo '<option value="' . $pole_type['TypeId'] . '">' . $pole_type['TypeName'] . '</option>'; } ?>
+                            </select>
+                        </div>                        
+                    </div>
+                    <div class="col-sm-6 mb-0 mt-0">
+                        <div class="form-group mb-0 mt-0">
+                            <label for="pole-size" class="col-form-label-sm">Pole Size</label>
+                            <select name="poleSizeId" id="pole-size" class="form-control select2 form-control-sm">
+                                <option value="">--Select Size--</option>
+                                <?php foreach ($sizes as $size) { echo '<option value="' . $size['poleSizeId'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
+                            </select>
+                        </div>                        
+                    </div>
+                </div>
 
-                    <div class="form-group pole-data mt-0 mb-0">
-                        <label for="pole-type" class="col-form-label-sm">Pole Type</label>
-                        <select name="poleTypeId" id="pole-type" class="form-control select2 form-control-sm">
-                            <option value="">--Select Type--</option>
-                            <?php foreach ($pole_types as $pole_type) { echo '<option value="' . $pole_type['TypeId'] . '">' . $pole_type['TypeName'] . '</option>'; } ?>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-check form-switch pole-data">
+                            <input type="hidden" name="utelOwned" id="utelOwned" value="N">
+                            <input class="form-check-input"
+                                type="checkbox"
+                                checked
+                                id="utel-owned"
+                                value="Y">
+
+                            <label class="form-check-label col-form-label-sm" for="utel-owned">
+                                UTel-Owned
+                            </label>
+                        </div>                        
+                    </div>
+                    <div class="col-sm-6">
+                        
+                    </div>
+                </div>
+
+
+                    <div class="form-group pole-data mt-0 mb-0 leasor-fields" style="display: none;">
+                        <label for="leasor" class="col-form-label-sm">Leasor</label>
+                        <select name="leasorId" id="leasor" class="form-control form-control-sm select2">
+                            <option value="">--Select Leasor--</option>
+                            <?php foreach ($leasors as $leasor) { echo '<option value="' . $leasor['id'] . '">' . $leasor['name'] . '</option>'; } ?>
                         </select>
                     </div>
 
-                    <div class="form-group pole-data mt-0 mb-0">
-                        <label for="pole-size">Pole Size</label>
-                        <select name="poleSizeId" id="pole-size" class="form-control select2">
-                            <option value="">--Select Size--</option>
-                            <?php foreach ($sizes as $size) { echo '<option value="' . $size['poleSizeId'] . '">' . $size['SizeLabel'] . '</option>'; } ?>
-                        </select>
+                    <div class="row pole-data mt-0 mb-0 leasor-fields" style="display: none;">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="lease-start-date" class="col-form-label sm">Lease Start Date</label>
+                                <input type="date" class="form-control form-control-sm" id="lease-start-date" name="leaseStartDate">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="lease-end-date" class="col-form-label sm">Lease End Date</label>
+                                <input type="date" class="form-control form-control-sm" id="lease-end-date" name="leaseEndDate">
+                            </div>
+                        </div>                        
                     </div>
+
+                    
                     <div class="manhole-data mt-0 mb-0">
                         <div class="form-group mt-0 mb-0">
                             <label for="manhole-location" class="col-form-label-sm">Location</label>

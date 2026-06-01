@@ -1,4 +1,11 @@
-<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header', ['title' => 'Infrastructure Details']); ?>
+<?php echo view('template'.DIRECTORY_SEPARATOR.'partial-header', ['title' => 'Infrastructure Details']); 
+
+$links = array_merge(
+    array_map(fn($link) => $link['carryId'], $downstreamElements),
+    array_map(fn($link) => $link['carryId'], $upstreamElements)
+);
+
+?>
 
 <div class="content-wrapper">
     <!-- Page Header -->
@@ -94,8 +101,10 @@
                         <?php } ?>
 
                     </div>
+                    <textarea name="all_ids" id="all-ids" hidden><?php echo implode(',', $links); ?></textarea>
                 </div>
                 <div class="footer p-3">
+                    <small class="text-muted float-left"><strong> <button type="button" id="unlink-all" class="btn btn-xs btn-danger round" data-toggle="modal" data-target="#delink-modal"><i class="fas fa-unlink"></i> Unlink From All</button> </strong> </small>
                     <small class="text-muted float-right"><strong> Created By </strong><?= esc($element['createdBy']) ?> | <strong> Created At</strong> <?= esc($element['createdAt']) ?></small>
                 </div>
             </div>
@@ -107,9 +116,9 @@
                 </div>
                 <div class="card-body">
                     <!-- Downstream Linkages -->
-                    <h4 class="mt-1 mb-3">Downstream Linkages</h4>
+                    <h4 class="mt-1">Downstream Linkages</h4>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-hover table-sm text-sm">
+                        <table class="table table-bordered data-table table-striped table-hover table-sm text-sm">
                             <thead class="thead-dark text-center">
                                 <tr>
                                     <th>Link Id</th>
@@ -122,6 +131,7 @@
                                     <th>Longitude</th>
                                     <th>Condition</th>
                                     <th>Distance(Meters)</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -135,9 +145,17 @@
                                         <td><a class="text-primary" title="View Element Details" href="<?= esc($url) ?>"><?= esc($link['elmCode']) ?></a></td>
                                         <td><?= esc($link['district']) ?></td>
                                         <td><?= esc($link['latitude']) ?></td>
-                                        <td><?= esc($link['longitude']) ?></td>
+                                         <td><?= esc($link['longitude']) ?></td>
                                         <td><?= esc($link['elmCondition']) ?></td>
                                         <td><?= esc($link['distance']) ?></td>
+                                        <td>
+                                            <button class="btn-danger unlink-element rounded-circle d-flex align-items-center justify-content-center p-0" title="Unlink Element" 
+                                                                        style="width:25px; height:25px;"
+                                                                        data-toggle="modal" 
+                                                                        data-target="#delink-modal">
+                                                <i class="fas fa-unlink"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -147,7 +165,7 @@
                     <!-- Upstream Linkages -->
                     <h4 class="mb-3">Upstream Linkages</h4>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-hover table-sm text-sm">
+                        <table class="table table-bordered data-table table-striped table-hover table-sm text-sm">
                             <thead class="thead-dark text-center">
                                 <tr>
                                     <th>Link Id</th>
@@ -160,6 +178,7 @@
                                     <th>Longitude</th>
                                     <th>Condition</th>
                                     <th>Distance(Meters)</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -177,6 +196,14 @@
                                         <td><?= esc($link['longitude']) ?></td>
                                         <td><?= esc($link['elmCondition']) ?></td>
                                         <td><?= esc($link['distance']) ?></td>
+                                        <td>
+                                            <button class="btn-danger unlink-element rounded-circle d-flex align-items-center justify-content-center p-0" title="Unlink Element" 
+                                                                        style="width:25px; height:25px;"
+                                                                        data-toggle="modal" 
+                                                                        data-target="#delink-modal">
+                                                <i class="fas fa-unlink"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -190,5 +217,28 @@
         </div>
     </section>
 </div>
+
+<!-- Delink Modal -->
+ <div class="modal fade" id="delink-modal" tabindex="-1" role="dialog" aria-labelledby="delinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="delinkModalLabel">Confirm Unlink</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to unlink this element from all its linkages? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <form action="<?php echo base_url('infrastructure/delink');?>" class="db-submit" method="post">
+                    <textarea name="delink_element_ids" id="delink-element-ids" class="d-none"></textarea>
+                <button type="reset" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger" id="confirm-delink">Unlink</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
 <?php echo view('template'.DIRECTORY_SEPARATOR.'partial-footer'); ?>
