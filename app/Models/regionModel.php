@@ -135,5 +135,50 @@ class RegionModel extends Model
                     ->orderBy('region.RegionName')
                     ->findAll();
     }
+
+    //ownership stats by region
+    public function getInfraOwnershipCount(string $elmType = '', ?array $filters = [])
+    {
+        $typeCondition = $elmType ? "AND ne.elmType = '$elmType'" : '';
+
+        $builder = $this->select(
+            "region.RegionName,
+            CASE
+                WHEN ne.utel_owned = 'Y' THEN 'Owned'
+                WHEN ne.utel_owned = 'N' THEN 'Leased'
+                ELSE 'Owned'
+            END AS ownership,
+            COUNT(ne.elmId) AS count",
+            false
+        )
+        ->join('tbldistrict d', 'region.RegionId = d.region_id', 'left')
+        ->join(
+            'tbl_infra_element ne',
+            "d.districtId = ne.district
+            AND ne.isElmDeleted = 0
+            $typeCondition",
+            'left'
+        );
+
+        if (!empty($filters)) {
+            foreach ($filters as $field => $value) {
+                if (is_array($value)) {
+                    $builder->whereIn($field, $value);
+                } else {
+                    $builder->where($field, $value);
+                }
+            }
+        }
+
+        return $builder
+            ->groupBy('region.RegionName')
+            ->groupBy("           CASE
+                WHEN ne.utel_owned = 'Y' THEN 'Owned'
+                WHEN ne.utel_owned = 'N' THEN 'Leased'
+                ELSE 'Owned'
+            END")
+            ->orderBy('region.RegionName')
+            ->findAll();
+    }
 }
 

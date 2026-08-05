@@ -304,7 +304,13 @@
                                 </div>
                                 <div class="tab-pane fade" id="map-view" role="tabpanel" aria-labelledby="map-tab">
                                         <!-- MAP VIEW -->
-                                    <div id="pole-map" class="map mt-3" style="height: 400px; width: 100%;"></div>
+                                         <div class="container-fluid vh-100 d-flex flex-column">
+                                            <div class="row flex-grow-1">
+                                                <div class="col-12 p-0">
+                                                    <div id="pole-map" class="map w-100 h-100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                 </div>
                             </div>
                         </div>
@@ -432,18 +438,17 @@
                             </label>
                         </div>                        
                     </div>
-                    <div class="col-sm-6">
-                        
-                    </div>
                 </div>
 
 
                     <div class="form-group pole-data mt-0 mb-0 leasor-fields" style="display: none;">
-                        <label for="leasor" class="col-form-label-sm">Leasor</label>
-                        <select name="leasorId" id="leasor" class="form-control form-control-sm select2">
-                            <option value="">--Select Leasor--</option>
-                            <?php foreach ($leasors as $leasor) { echo '<option value="' . $leasor['id'] . '">' . $leasor['name'] . '</option>'; } ?>
-                        </select>
+                        <div class="col-sm-6">
+                            <label for="leasor" class="col-form-label-sm">Leasor</label>
+                            <select name="leasorId" id="leasor" class="form-control form-control-sm select2">
+                                <option value="">--Select Leasor--</option>
+                                <?php foreach ($leasors as $leasor) { echo '<option value="' . $leasor['id'] . '">' . $leasor['name'] . '</option>'; } ?>
+                            </select>                            
+                        </div>
                     </div>
 
                     <div class="row pole-data mt-0 mb-0 leasor-fields" style="display: none;">

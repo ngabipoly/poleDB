@@ -54,19 +54,30 @@
             </div>
             <!-- Charts Row -->
             <div class="row my-4">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card">
+                        <!-- Card Header for Pole ownership -->
                         <div class="card-header bg-primary">
-                            <h3 class="card-title">Poles Condition</h3>
+                            <h3 class="card-title">Poles By Ownership</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="ownershipChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-success">
+                            <h3 class="card-title">Poles By Condition</h3>
                         </div>
                         <div class="card-body">
                             <canvas id="conditionChart"></canvas>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card">
-                        <div class="card-header bg-success">
+                        <div class="card-header bg-info">
                             <h3 class="card-title">Pole Size Distribution</h3>
                         </div>
                         <div class="card-body">
@@ -74,9 +85,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card">
-                        <div class="card-header bg-info">
+                        <div class="card-header bg-primary">
+                            <h3 class="card-title">Regional Pole Ownership</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="regionOwnershipChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-success">
                             <h3 class="card-title">Regional Pole Distribution</h3>
                         </div>
                         <div class="card-body">
@@ -84,7 +105,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card">
                         <div class="card-header bg-info">
                             <h3 class="card-title">Manholes By Region</h3>

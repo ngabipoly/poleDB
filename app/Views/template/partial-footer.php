@@ -179,6 +179,53 @@
                 }
             });
 
+            // Poles by Ownership Chart
+            const ownershipLabels = data.polesByOwnership.map(item => item.utel_owned === 'Y' ? 'Owned' : 'Leased');
+            const ownershipData = data.polesByOwnership.map(item => parseInt(item.count));
+            new Chart($('#ownershipChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ownershipLabels,
+                    datasets: [{
+                        label: 'Poles by Ownership',
+                        data: ownershipData,
+                        backgroundColor: ['#01004C', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Poles by Ownership'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Poles'
+                            }
+                        }
+                    }
+                }
+            });
+          
             // Manholes By Region Chart
             const manholeRegionLabels = data.manholesByRegion.map(item => item.RegionName);
             const manholeRegionData = data.manholesByRegion.map(item => parseInt(item.count));
@@ -225,6 +272,79 @@
                     }
                 }
             });
+
+            // Ownership By Region Chart
+            /***
+             * 
+             */
+            const grouped = {};
+            data.ownershipByRegion.forEach(item => {
+                if (!grouped[item.RegionName]) {
+                    grouped[item.RegionName] = {
+                        Owned: 0,
+                        Leased: 0
+                    };
+                }
+
+                grouped[item.RegionName][item.ownership] = parseInt(item.count);
+            });
+
+            const chartLabels = Object.keys(grouped);
+
+            const owned = chartLabels.map(r => grouped[r].Owned);
+            const leased = chartLabels.map(r => grouped[r].Leased);
+
+            new Chart($('#regionOwnershipChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        {
+                            label: 'Owned',
+                            data: owned,
+                            backgroundColor: '#01004C'
+                        },
+                        {
+                            label: 'Leased',
+                            data: leased,
+                            backgroundColor: '#dc3545'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Pole by Ownership and Region'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Poles'
+                            }
+                        }
+                    }
+                }
+            });
+ 
         });
 
       <?php } ?>
@@ -503,7 +623,8 @@ $('#map-tab').click(function (e) {
 
 function initMap() {
     // Define custom icon styles using colored PNGs
-    const iconBaseUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+    //const iconBaseUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+    const iconBaseUrl = '<?php echo base_url();?>assets/img/loc-icons/'; // Use local icons
     const icons = {
         Good: new L.Icon({
             iconUrl: iconBaseUrl + 'marker-icon-green.png',
@@ -589,10 +710,13 @@ function initMap() {
 }
 
 function initConnectMap() {
-  const iconBase = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+  //const iconBase = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+  const iconBaseOwned = '<?php echo base_url();?>assets/img/loc-icons/owned/';
+  const iconBaseLeased = '<?php echo base_url();?>assets/img/loc-icons/leased/';
+
   const typeIcons = {
-    Pole: new L.Icon({ iconUrl: iconBase + 'marker-icon-green.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
-    Manhole: new L.Icon({ iconUrl: iconBase + 'marker-icon-blue.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
+    Pole: new L.Icon({ iconUrl: iconBase + 'icon-o-green1.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[32,41], iconAnchor:[12,41] }),
+    Manhole: new L.Icon({ iconUrl: iconBase + 'icon-o-blue.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
     OLTE: new L.Icon({ iconUrl: iconBase + 'marker-icon-orange.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
     Building: new L.Icon({ iconUrl: iconBase + 'marker-icon-violet.png', shadowUrl: iconBase+'marker-shadow.png', iconSize:[25,41], iconAnchor:[12,41] }),
     Default: new L.Icon.Default()

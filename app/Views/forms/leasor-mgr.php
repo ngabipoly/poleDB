@@ -81,6 +81,13 @@
                         <input type="text" class="form-control" id="leasorName" name="leasorName" required>
                     </div>
                     <div class="form-group">
+                        <label for="contractStatus">Contract Status</label>
+                        <select class="form-control select2" id="contractStatus" name="contractStatus">
+                            <option value="A">Available</option>
+                            <option value="U">Unavailable</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="leaseStart">Contract Start</label>
                         <input type="date" class="form-control" id="leaseStart" name="leaseStart" required>
                     </div>
